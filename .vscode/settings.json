@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "__locale": "cpp",
+        "fstream": "cpp",
+        "locale": "cpp",
+        "*.tcc": "cpp"
+    }
+}
