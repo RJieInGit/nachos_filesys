@@ -56,6 +56,8 @@ class FileHeader {
 
     void Print();			// Print the contents of the file.
 
+    FileHeader();
+
 
 
   private:
