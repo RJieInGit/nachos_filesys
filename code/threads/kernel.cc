@@ -113,7 +113,8 @@ Kernel::Initialize()
 	}
 #else
     fileSystem = new FileSystem(formatFlag);
-    if(fileSystem->Create("swapSpace", 0)) {
+    // swapSpace creted in the root dir
+    if(fileSystem->Create("swapSpace", 0, DirectorySector)) {
 		swapSpace = fileSystem->Open("swapSpace");
 	}
     semaphoreRead = new  std::map<int, Semaphore*>;
