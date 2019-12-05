@@ -17,10 +17,11 @@
 #ifndef SYNCH_H
 #define SYNCH_H
 
+#include "main.h"
 #include "copyright.h"
 #include "thread.h"
 #include "list.h"
-#include "main.h"
+
 
 // The following class defines a "semaphore" whose value is a non-negative
 // integer.  The semaphore has only two operations P() and V():
@@ -65,7 +66,6 @@ class Semaphore {
 // In addition, by convention, only the thread that acquired the lock
 // may release it.  As with semaphores, you can't read the lock value
 // (because the value might change immediately after you read it).  
-extern Kernel *kernel;
 class Lock {
   public:
     Lock(char* debugName);  	// initialize lock to be FREE
