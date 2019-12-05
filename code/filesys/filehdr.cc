@@ -28,6 +28,7 @@
 #include "debug.h"
 #include "synchdisk.h"
 #include "main.h"
+#include "fileblock.h"
 
 /*
 constructor , initial file size would be 0
