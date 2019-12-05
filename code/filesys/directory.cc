@@ -180,7 +180,7 @@ Directory::AddDirectory(char *name, int newSector) {
         }
     }
 
-    ASSERT(false);  // should not happen
+    //ASSERT(false);  // should not happen
     return false;   // no space.  Fix when we have extensible files.
 }
 
