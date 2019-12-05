@@ -67,7 +67,7 @@ FileHeader::Allocate(PersistentBitmap *freeMap, int fileSize)
     for (int i = 0; i < numSectors && allocated<needSectors; i++) {
         block = new IndirectBlock();
         if(dataSectors[i] ==EMPTY_BLOCK)
-            dataSectors[i]= freeMap->Find();
+            dataSectors[i]= freeMap->FindAndSet();
         else
             block->FetchFrom(dataSectors[i]);
         ASSERT(dataSectors[i] != EMPTY_BLOCK);     // if the sector did not store a block, it should have one after we create assign one to it
