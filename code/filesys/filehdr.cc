@@ -71,13 +71,13 @@ FileHeader::Allocate(PersistentBitmap *freeMap, int fileSize)
         else
             block->FetchFrom(dataSectors[i]);
         ASSERT(dataSectors[i] != EMPTY_BLOCK);     // if the sector did not store a block, it should have one after we create assign one to it
-        int sectorsInBlock = block(freeMap,needSectors- allocated);
+        int sectorsInBlock = block->Allocate(freeMap,needSectors- allocated);
         ASSERT(sectorsInBlock != -1);
         block->WriteBack(dataSectors[i]);          // store the block to disk
         allocated+= sectorsInBlock;
         delete block;                              //we already write it to disk, free the memory
     }
-    ASSERT(needSectors < =allocated);
+    ASSERT(needSectors <=allocated);
      numBytes += fileSize;
      numSectors  += divRoundUp(fileSize, SectorSize);
     DEBUG('f', "file header allocated\n");
@@ -100,11 +100,11 @@ FileHeader::Deallocate(PersistentBitmap *freeMap)
         int blockSector = dataSectors[i];
         if(blockSector==EMPTY_BLOCK)
             continue;                    // do nothing if we dont have a block here
-        ASSERT(freeMap->Test(sector));   // assert the sector do occupied
+        ASSERT(freeMap->Test(blockSector));   // assert the sector do occupied
         block=new IndirectBlock();
         block->FetchFrom(blockSector);
         block->Deallocate(freeMap);
-        ASSERT(freeMap->Test(sector));   // to be deleted
+        ASSERT(freeMap->Test(blockSector));   // to be deleted
         freeMap->Clear(sector);
         dataSectors[i] = EMPTY_BLOCK;    // why github guy dont do this?????
         delete block;
@@ -156,7 +156,7 @@ FileHeader::ByteToSector(int offset)
     IndirectBlock *block =new IndirectBlock();
     block->FetchFrom(dataSectors[vBlock/MAX_SECTOR]);
     int pBlock= block->ByteToSector((vBlock%MAX_SECTOR) *SectorSize);
-    ASSERT(pBLock>=0 && pBlock < NumSectors);
+    ASSERT(pBlock>=0 && pBlock < NumSectors);
     delete block;
     return pBlock;
 
