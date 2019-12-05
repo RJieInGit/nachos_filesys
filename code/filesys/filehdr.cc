@@ -105,7 +105,7 @@ FileHeader::Deallocate(PersistentBitmap *freeMap)
         block->FetchFrom(blockSector);
         block->Deallocate(freeMap);
         ASSERT(freeMap->Test(blockSector));   // to be deleted
-        freeMap->Clear(sector);
+        freeMap->Clear(blockSector);
         dataSectors[i] = EMPTY_BLOCK;    // why github guy dont do this?????
         delete block;
 
