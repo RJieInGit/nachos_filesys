@@ -20,7 +20,8 @@
 #include "machine.h"
 #include "list.h"
 #include "bitmap.h"
-
+#include "map"
+#include "synch.h"
 class PostOfficeInput;
 class PostOfficeOutput;
 class SynchConsoleInput;
@@ -60,6 +61,16 @@ class Kernel {
     PostOfficeOutput *postOfficeOut;
 
     int hostName;               // machine identifier
+
+    //sync for reader and writers, mulitple thread can hold same openfile but read write sync
+    // the key is the sector num of the filehdr 
+    std::map<int, Semaphore*> *semaphoreRead;
+    std::map<int, Semaphore*> *semaphoreWrite;
+    std::map<int, int> *readerCount;
+
+    // a file can only be removed and its sectors be reallocated if no thread is currenty opening it
+    std::map<int, int> *OpenFileCount;
+    
 
     //page fault
     OpenFile* swapSpace;

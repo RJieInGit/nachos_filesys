@@ -52,6 +52,8 @@ Thread::Thread(char* threadName)
 	childList = new List<Thread*>();
     finishedChild = new List<int>();
     PID = threadNum++; //start from 0
+    //the curr directory point to /root
+    wdSector= 1；
     cout<<"Thread with PID "<< PID <<" is generated!"<<endl;
 }
 

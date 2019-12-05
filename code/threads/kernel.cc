@@ -116,6 +116,10 @@ Kernel::Initialize()
     if(fileSystem->Create("swapSpace", 0)) {
 		swapSpace = fileSystem->Open("swapSpace");
 	}
+    semaphoreRead = new  std::map<int, Semaphore*>;
+    semaphoreWrite = new  std::map<int, Semaphore*>;
+    readerCount  =new std::map<std::string,int>;
+    OpenFileCount = new std::map<int, int>;
 #endif // FILESYS_STUB
     postOfficeIn = new PostOfficeInput(10);
     postOfficeOut = new PostOfficeOutput(reliability);

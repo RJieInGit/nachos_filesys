@@ -40,6 +40,7 @@
 #include "copyright.h"
 #include "utility.h"
 #include "sysdep.h"
+#include "string.h"
 
 #include "machine.h"
 #include "addrspace.h"
@@ -111,6 +112,9 @@ class Thread {
 	Thread* father;
 	List<Thread*>* childList;
     List<int>* finishedChild;
+
+    int wdSector;
+    std:: string currPath;
 
   private:
     // some of the private data for this class is listed above
