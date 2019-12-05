@@ -73,17 +73,19 @@ class FileSystem {
 					// the disk, so initialize the directory
     					// and the bitmap of free blocks.
 
-    bool Create(char *name, int initialSize);  	
+    bool Create(char *name, int initialSize, int wdSector);  	
 					// Create a file (UNIX creat)
 
-    OpenFile* Open(char *name); 	// Open a file (UNIX open)
+    OpenFile* Open(char *name, int wdSector); 	// Open a file (UNIX open)
 
-    bool Remove(char *name);  		// Delete a file (UNIX unlink)
+    bool Remove(char *name, int wdSector);  		// Delete a file (UNIX unlink)
 
-    void List();			// List all the files in the file system
+    void List(int dirSector);			// List all the files in the file system
 
     void Print();			// List all the files and their contents
 
+OpenFile *GetFreeMapFile();   // getter method
+OpenFile *GetDirectoryFile(); // getter method
   private:
    OpenFile* freeMapFile;		// Bit map of free disk blocks,
 					// represented as a file

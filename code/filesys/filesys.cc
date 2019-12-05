@@ -51,6 +51,7 @@
 #include "directory.h"
 #include "filehdr.h"
 #include "filesys.h"
+#include "main.h"
 
 // Sectors containing the file headers for the bitmap of free sectors,
 // and the directory of files.  These file headers are placed in well-known 
@@ -64,6 +65,34 @@
 #define FreeMapFileSize 	(NumSectors / BitsInByte)
 #define NumDirEntries 		10
 #define DirectoryFileSize 	(sizeof(DirectoryEntry) * NumDirEntries)
+
+
+
+//to achieve the file heirachy, this func take the relative path of the file and the dirFile sector num of current dir
+int parse_path(char **path, int wdSector) {
+    std::string cur_path(*path), dirname;
+    std::string::size_type i;
+    while((i = cur_path.find("/")) != std::string::npos) {
+        dirname = cur_path.substr(0, i);
+        cur_path = cur_path.substr(i+1, cur_path.size());
+
+        Directory *dir = new(std::nothrow) Directory(NumDirEntries);
+        OpenFile *dirFile = new(std::nothrow) OpenFile(wdSector);
+        dir->FetchFrom(dirFile);
+        if(!dir->isDirectory((char *) dirname.c_str()))
+            return -1;
+        wdSector = dir->Find((char *) dirname.c_str());
+        delete dir;
+        delete dirFile;
+    }
+
+    char *filename = new char[cur_path.size() + 1];
+    std::copy(cur_path.begin(), cur_path.end(), filename);
+    filename[cur_path.size()] = '\0';
+
+    *path = filename;
+    return wdSector;
+}
 
 //----------------------------------------------------------------------
 // FileSystem::FileSystem
@@ -171,19 +200,30 @@ FileSystem::FileSystem(bool format)
 //	"initialSize" -- size of file to be created
 //----------------------------------------------------------------------
 
+//dirSector should be the dirSectory of current dirtory
 bool
-FileSystem::Create(char *name, int initialSize)
+FileSystem::Create(char *name, int initialSize, int dirSector)
 {
     Directory *directory;
     PersistentBitmap *freeMap;
     FileHeader *hdr;
     int sector;
     bool success;
+    
 
     DEBUG(dbgFile, "Creating file " << name << " size " << initialSize);
 
+    //directoryLock->Acquire();
+    wdSector = parse_path(&name, wdSector);
+    if(wdSector < 0) {
+        DEBUG('f', "bad path: %s\n", name);
+        directoryLock->Release();
+        return false;
+    }
     directory = new Directory(NumDirEntries);
-    directory->FetchFrom(directoryFile);
+     OpenFile *dirFile = new(std::nothrow) OpenFile(wdSector);
+    directory->FetchFrom(dirFile);
+
 
     if (directory->Find(name) != -1)
       success = FALSE;			// file is already in directory
@@ -202,7 +242,7 @@ FileSystem::Create(char *name, int initialSize)
 	    	success = TRUE;
 		// everthing worked, flush all changes back to disk
     	    	hdr->WriteBack(sector); 		
-    	    	directory->WriteBack(directoryFile);
+    	    	directory->WriteBack(dirFile);
     	    	freeMap->WriteBack(freeMapFile);
 	    }
             delete hdr;
@@ -224,18 +264,38 @@ FileSystem::Create(char *name, int initialSize)
 //----------------------------------------------------------------------
 
 OpenFile *
-FileSystem::Open(char *name)
+FileSystem::Open(char *name, int wdSector)
 { 
+
     Directory *directory = new Directory(NumDirEntries);
     OpenFile *openFile = NULL;
     int sector;
 
     DEBUG(dbgFile, "Opening file" << name);
-    directory->FetchFrom(directoryFile);
+    wdSector = parse_path(&name, wdSector);
+    if(wdSector < 0) {
+        DEBUG('f', "bad path: %s\n", name);
+        directoryLock->Release();
+        return false;
+    }
+    OpenFile *dirFile =new OpenFile(wdSector);
+    directory->FetchFrom(dirFile);
     sector = directory->Find(name); 
     if (sector >= 0) 		
 	openFile = new OpenFile(sector);	// name was found in directory 
+    // initial or update the sync map in kernel
+    if(kernel->OpenFileCount->find(sector)== kernel->OpenFileCount->end())
+    kernel->OpenFileCount[sector]=1;
+    else
+    {
+        kernel->OpenFileCount[sector]=kernel->OpenFileCount[sector]+1;
+    }
+     if(kernel->semaphoreRead->find(sector)== kernel->semaphoreRead->end())
+        kernel->semaphoreRead[sector]= new Semaphore("readsemaphore",1);
+      if(kernel->semaphoreWrite->find(sector)== kernel->semaphoreRead->end())
+        kernel->semaphoreWrite[sector] =new Semaphore("writesemaphore",1);
     delete directory;
+    delete dirFile;
     return openFile;				// return NULL if not found
 }
 
@@ -254,20 +314,48 @@ FileSystem::Open(char *name)
 //----------------------------------------------------------------------
 
 bool
-FileSystem::Remove(char *name)
+FileSystem::Remove(char *name, int WdSector)
 { 
     Directory *directory;
     PersistentBitmap *freeMap;
     FileHeader *fileHdr;
     int sector;
     
+    
+
+     DEBUG('r', "starting filesystem remove\n");
+    //directoryLock->Acquire();
+    wdSector = parse_path(&name, wdSector);
+    if(wdSector < 0) {
+        DEBUG('f', "bad path: %s\n", name);
+        //directoryLock->Release();
+        return false;
+    }
+// since we use sector num as sync map key, we cannot remove the file while someone opens it
+if(kernel->OpenFileCount->find(wdSector)!=kernel->OpenFileCount->end() && 
+    kernel->OpenFileCount[wdSector]>0){
+        Debug('f',"cannot remove file, some thread still holds the openfile of it\n");
+        return false;
+    }
+    OpenFile *dirFile = new(std::nothrow) OpenFile(wdSector);
+
     directory = new Directory(NumDirEntries);
-    directory->FetchFrom(directoryFile);
+    directory->FetchFrom(dirFile);
     sector = directory->Find(name);
     if (sector == -1) {
        delete directory;
+       delete dirFile;
        return FALSE;			 // file not found 
     }
+
+     if(directory->isDirectory(name)) {
+        DEBUG('f', "cannot Remove() directory\n");
+        delete directory;
+        delete dirFile;
+        directoryLock->Release();
+        return false;
+    }
+
     fileHdr = new FileHeader;
     fileHdr->FetchFrom(sector);
 
@@ -278,10 +366,12 @@ FileSystem::Remove(char *name)
     directory->Remove(name);
 
     freeMap->WriteBack(freeMapFile);		// flush to disk
-    directory->WriteBack(directoryFile);        // flush to disk
+    directory->WriteBack(dirFile);        // flush to disk
     delete fileHdr;
     delete directory;
+    delete dirFile;
     delete freeMap;
+    DEBUG('r', "finished removing file\n");
     return TRUE;
 } 
 
@@ -291,13 +381,16 @@ FileSystem::Remove(char *name)
 //----------------------------------------------------------------------
 
 void
-FileSystem::List()
+FileSystem::List(int dirSector)
 {
     Directory *directory = new Directory(NumDirEntries);
+    OpenFile *dirFile =new OpenFile(dirSector);
 
-    directory->FetchFrom(directoryFile);
-    directory->List();
+
+    directory->FetchFrom(dirFile);
+    directory->List(0);
     delete directory;
+    delete dirFile;
 }
 
 //----------------------------------------------------------------------
@@ -336,5 +429,117 @@ FileSystem::Print()
     delete freeMap;
     delete directory;
 } 
+
+bool
+FileSystem::MakeDir(char *name, int initialSize, int wdSector)
+{
+    Directory *directory;
+    OpenFile *dirFile;
+    BitMap *freeMap;
+    FileHeader *hdr;
+    int sector;
+    bool success;
+
+    DEBUG('f', "Creating file %s, size %d\n", name, initialSize);
+
+    directoryLock->Acquire();
+    wdSector = parse_path(&name, wdSector);
+    if(wdSector < 0) {
+        DEBUG('f', "bad path: %s\n", name);
+        directoryLock->Release();
+        return false;
+    }
+
+    directory = new(std::nothrow) Directory(NumDirEntries);
+    dirFile = new(std::nothrow) OpenFile(wdSector);
+    directory->FetchFrom(dirFile);
+
+    if (directory->Find(name) != -1)
+      success = false;          // file is already in directory
+    else {
+        diskmapLock->Acquire(); 
+        freeMap = new(std::nothrow) BitMap(NumSectors);
+        freeMap->FetchFrom(freeMapFile);
+        sector = freeMap->Find();   // find a sector to hold the file header
+        if (sector == -1)       
+            success = false;        // no free block for file header 
+        else if (!directory->AddDirectory(name, sector))
+            success = false;    // no space in directory
+        else {
+            ASSERT(directory->Find(name) != -1);
+            hdr = new(std::nothrow) FileHeader();
+            if (!hdr->Allocate(freeMap, initialSize))
+                success = false;    // no space on disk for data
+            else {  
+                success = true; // everthing worked, flush all changes back to disk
+                hdr->WriteBack(sector);         
+                directory->WriteBack(dirFile);
+                freeMap->WriteBack(freeMapFile);
+
+                Directory *newDir = new(std::nothrow) Directory(NumDirEntries);
+                OpenFile *newFile = new(std::nothrow) OpenFile(sector);
+                ASSERT(newDir->AddDirectory(".", sector));
+                ASSERT(newDir->AddDirectory("..", wdSector));
+                newDir->WriteBack(newFile);
+                delete newDir;
+                delete newFile;
+            }
+            delete hdr;
+        }
+        delete freeMap;
+        diskmapLock->Release();
+    }
+    directoryLock->Release();
+    delete directory;
+    delete dirFile;
+    return success;
+}
+
+int
+FileSystem::ChangeDir(char *name, int wdSector) {
+    Directory *directory;
+    OpenFile *dirFile;
+    int sector;
+
+    directoryLock->Acquire();
+    wdSector = parse_path(&name, wdSector);
+    if(wdSector < 0) {
+        DEBUG('f', "bad path: %s\n", name);
+        directoryLock->Release();
+        return -1;
+    }
+
+
+    dirFile = new(std::nothrow) OpenFile(wdSector);
+    directory = new(std::nothrow) Directory(NumDirEntries);
+    directory->FetchFrom(dirFile);
+
+    if(!directory->isDirectory(name)) {
+        DEBUG('f', "could not find directory %s\n", name);
+        directoryLock->Release();
+        delete directory;
+        delete dirFile;
+        return -1;
+    }
+
+    sector = directory->Find(name);
+
+    directoryLock->Release();
+    delete directory;
+    delete dirFile;
+    return sector;
+}
+
+// getter method for freeMapFile
+OpenFile *
+FileSystem:: GetFreeMapFile() {
+    return freeMapFile;
+}
+
+//getter method for directoryFile
+OpenFile *
+FileSystem:: GetDirectoryFile() {
+    return directoryFile;
+}
 
 #endif // FILESYS_STUB

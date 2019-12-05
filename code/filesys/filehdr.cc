@@ -29,37 +29,63 @@
 #include "synchdisk.h"
 #include "main.h"
 
+/*
+constructor , initial file size would be 0
+*/
+FileHeader::FileHeader(){
+    for(int i=0;i<NumDirect;i++){
+        dataSectors[i]=EMPTY_BLOCK;
+        numBytes=0;
+        numSectors=0;
+    }
+}
+
+
 //----------------------------------------------------------------------
 // FileHeader::Allocate
 // 	Initialize a fresh file header for a newly created file.
-//	Allocate data blocks for the file out of the map of free disk blocks.
-//	Return FALSE if there are not enough free blocks to accomodate
-//	the new file.
+//	the initial file size is 0 and we dynamically extend it when we write to 
+//  the file later
 //
 //	"freeMap" is the bit map of free disk sectors
 //	"fileSize" is the bit map of free disk sectors
 //----------------------------------------------------------------------
 
+
 bool
 FileHeader::Allocate(PersistentBitmap *freeMap, int fileSize)
 { 
-    numBytes = fileSize;
-    numSectors  = divRoundUp(fileSize, SectorSize);
+    DEBUG('f',"now start file header allocation\n");
+   
+    int needSectors  = divRoundUp(fileSize, SectorSize);
     if (freeMap->NumClear() < numSectors)
 	return FALSE;		// not enough space
-
-    for (int i = 0; i < numSectors; i++) {
-	dataSectors[i] = freeMap->FindAndSet();
-	// since we checked that there was enough free space,
-	// we expect this to succeed
-	ASSERT(dataSectors[i] >= 0);
+    DEBUG('f',"enough space for the file\n");
+    IndirectBlock *block;
+    int allocated=0;
+    for (int i = 0; i < numSectors && allocated<needSectors; i++) {
+        block = new IndirectBlock();
+        if(dataSectors[i] ==EMPTY_BLOCK)
+            dataSectors[i]= freeMap->Find();
+        else
+            block->FetchFrom(dataSectors[i]);
+        ASSERT(dataSectors[i] != EMPTY_BLOCK);     // if the sector did not store a block, it should have one after we create assign one to it
+        int sectorsInBlock = block(freeMap,needSectors- allocated);
+        ASSERT(sectorsInBlock != -1);
+        block->WriteBack(dataSectors[i]);          // store the block to disk
+        allocated+= sectorsInBlock;
+        delete block;                              //we already write it to disk, free the memory
     }
-    return TRUE;
+    ASSERT(needSectors < =allocated);
+     numBytes += fileSize;
+     numSectors  += divRoundUp(fileSize, SectorSize);
+    DEBUG('f', "file header allocated\n");
+    return true;
 }
 
 //----------------------------------------------------------------------
 // FileHeader::Deallocate
-// 	De-allocate all the space allocated for data blocks for this file.
+// 	De-allocate all the space allocated in the blocks allocated in the filehdr
 //
 //	"freeMap" is the bit map of free disk sectors
 //----------------------------------------------------------------------
@@ -67,10 +93,23 @@ FileHeader::Allocate(PersistentBitmap *freeMap, int fileSize)
 void 
 FileHeader::Deallocate(PersistentBitmap *freeMap)
 {
+    DEBUG('f', "beginning filehdr deallocation\n");
+    IndirectBlock *block;
     for (int i = 0; i < numSectors; i++) {
-	ASSERT(freeMap->Test((int) dataSectors[i]));  // ought to be marked!
-	freeMap->Clear((int) dataSectors[i]);
+        int blockSector = dataSectors[i];
+        if(blockSector==EMPTY_BLOCK)
+            continue;                    // do nothing if we dont have a block here
+        ASSERT(freeMap->Test(sector));   // assert the sector do occupied
+        block=new IndirectBlock();
+        block->FetchFrom(blockSector);
+        block->Deallocate(freeMap);
+        ASSERT(freeMap->Test(sector));   // to be deleted
+        freeMap->Clear(sector);
+        dataSectors[i] = EMPTY_BLOCK;    // why github guy dont do this?????
+        delete block;
+
     }
+    DEBUG('f', "finished filehdr deallocation\n");
 }
 
 //----------------------------------------------------------------------
@@ -112,7 +151,14 @@ FileHeader::WriteBack(int sector)
 int
 FileHeader::ByteToSector(int offset)
 {
-    return(dataSectors[offset / SectorSize]);
+    int vBlock = offset/SectorSize;
+    IndirectBlock *block =new IndirectBlock();
+    block->FetchFrom(dataSectors[vBlock/MAX_SECTOR]);
+    int pBlock= block->ByteToSector((vBlock%MAX_SECTOR) *SectorSize);
+    ASSERT(pBLock>=0 && pBlock < NumSectors);
+    delete block;
+    return pBlock;
+
 }
 
 //----------------------------------------------------------------------

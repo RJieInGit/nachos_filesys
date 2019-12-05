@@ -163,16 +163,28 @@ Directory::Remove(char *name)
 //----------------------------------------------------------------------
 // Directory::List
 // 	List all the file names in the directory. 
+// recursively
 //----------------------------------------------------------------------
 
 void
-Directory::List()
+Directory::List(int tabs)
 {
-   for (int i = 0; i < tableSize; i++)
-	if (table[i].inUse)
-	    printf("%s\n", table[i].name);
+    for (int i = 0; i < tableSize; i++) {
+        if (table[i].inUse) {
+            for(int j = 0; j < tabs; ++j)
+                printf("\t");
+            printf("%s\n", table[i].name);
+            if(table[i].isDir && strcmp(table[i].name, ".") && strcmp(table[i].name, "..")) {
+                Directory *dir = new(std::nothrow) Directory(10);
+                OpenFile *dirFile = new(std::nothrow) OpenFile(table[i].sector);
+                dir->FetchFrom(dirFile);
+                dir->List(tabs + 1);
+                delete dir;
+                delete dirFile;
+            }
+        }
+    }
 }
-
 //----------------------------------------------------------------------
 // Directory::Print
 // 	List all the file names in the directory, their FileHeader locations,
@@ -193,4 +205,19 @@ Directory::Print()
 	}
     printf("\n");
     delete hdr;
+}
+
+// expand the maximum can hold by a directory , also double the size of the directoryentry table size
+void
+Directory::Expand(int size) {
+    DirectoryEntry *newTable = new(std::nothrow) DirectoryEntry[size];  // create new table
+    for(int i = 0; i < size; ++i) {     // copy over previous table
+        if(i < tableSize)
+            newTable[i] = table[i];
+        else
+            newTable[i].inUse = false;
+    }
+    delete[] table;
+    table = newTable;
+    tableSize *= 2;
 }

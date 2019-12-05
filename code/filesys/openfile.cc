@@ -31,6 +31,21 @@ OpenFile::OpenFile(int sector)
     hdr = new FileHeader;
     hdr->FetchFrom(sector);
     seekPosition = 0;
+    hdrSector = sector;
+    if(kernel->OpenFileCount->find(hdrSector) == kernel->OpenFileCount->end())
+    kernel->OpenFileCount[hdrSector]=0;
+    else
+    {
+        kernel->OpenFileCount[hdrSector]=kernel->OpenFileCount[hdrSector]+1;
+    }
+    
+
+    if(kernel->readerCount->find(hdrSector) == kernel->readerCount->end())
+    kernel->readerCount[sector]=0;
+    if(kernel->semaphoreWrite->find(hdrSector) == kernel->semaphoreWrite->end())
+    kernel->semaphoreWrite[sector] = new Semaphore("write",1);
+    if(kernel->semaphoreRead->find(hdrSector) == kernel->semaphoreRead->end())
+    kernel->semaphoreRead[sector] = new Semaphore("read",1);
 }
 
 //----------------------------------------------------------------------
@@ -41,6 +56,7 @@ OpenFile::OpenFile(int sector)
 OpenFile::~OpenFile()
 {
     delete hdr;
+    kernel-> OpenFileCount[hdrSector] = kernel->OpenFileCount[hdrSector]-1;
 }
 
 //----------------------------------------------------------------------
@@ -73,16 +89,44 @@ OpenFile::Seek(int position)
 int
 OpenFile::Read(char *into, int numBytes)
 {
+    Debug('f',"reading file\n");
+    Debug('f',"semaphore Key: hdrSector(%d)",hdrSector);
+   kernel—> semaphoreRead[hdrSector]->P();
+   if(kernel->readerCount->find(hdrSector) != kernel->readerCount->end())
+        kernel->readerCount[hdrSector]= kernel->readerCount[hdrSector]+1;
+   if(kernel->readerCount[hdrSector]==1)
+   kernel->semaphoreWrite[hdrSector]->P();
+   kernel->semaphoreRead[hdrSector]->V();
+
    int result = ReadAt(into, numBytes, seekPosition);
    seekPosition += result;
+
+   kernel->semaphoreRead[hdrSector]->P();
+   if(kernel->readerCount->find(hdrSector) != kernel->readerCount->end())
+        kernel->readerCount[hdrSector]= kernel->readerCount[hdrSector]-1;
+    if(kernel->readerCount[hdrSector]==0)
+        kernel->semaphoreWrite[hdrSector]->V();
+   kernel->semaphoreRead[hdrSector]->V();
    return result;
 }
 
 int
 OpenFile::Write(char *into, int numBytes)
-{
+{    
+    //extend the file if necessary
+    if(seekPosition + numBytes > hdr->FileLength()){
+        PersistentBitmap *freeMap = new PersistentBitmap(NumSectors));
+        freeMap->FetchFrom(kernel->fileSystem->GetFreeMapFile());
+        ASSERT(hdr->Allocate(freeMap,numBytes));
+        hdr->WriteBack(hdrSector);
+        freeMap->WriteBack(kernel->fileSystem->GetFreeMapFile());
+        delete freeMap;
+    }
+    kernel->semaphoreWrite[hdrSector]->P();
    int result = WriteAt(into, numBytes, seekPosition);
    seekPosition += result;
+
+   kernel->semaphoreWrite[hdrSector]->P();
    return result;
 }
 

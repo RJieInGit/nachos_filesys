@@ -65,12 +65,12 @@ class Directory {
 
     bool Remove(char *name);		// Remove a file from the directory
 
-    void List();			// Print the names of all the files
+    void List(int tabs);			// Print the names of all the files
 					//  in the directory
     void Print();			// Verbose print of the contents
 					//  of the directory -- all the file
 					//  names and their contents.
-
+    void Expand(int size);
   private:
     int tableSize;			// Number of directory entries
     DirectoryEntry *table;		// Table of pairs: 
