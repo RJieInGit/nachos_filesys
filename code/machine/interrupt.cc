@@ -21,8 +21,9 @@
 // of liability and disclaimer of warranty provisions.
 
 #include "copyright.h"
-#include "interrupt.h"
 #include "main.h"
+#include "interrupt.h"
+
 
 // String definitions for debugging messages
 

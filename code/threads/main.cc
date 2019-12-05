@@ -46,7 +46,9 @@
 #include "openfile.h"
 #include "sysdep.h"
 
-
+// global variables
+Kernel *kernel;
+Debug *debug;
 
 extern void ThreadTest(void);
 
