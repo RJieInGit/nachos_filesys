@@ -65,7 +65,7 @@ class Semaphore {
 // In addition, by convention, only the thread that acquired the lock
 // may release it.  As with semaphores, you can't read the lock value
 // (because the value might change immediately after you read it).  
-
+extern Kernel *kernel;
 class Lock {
   public:
     Lock(char* debugName);  	// initialize lock to be FREE
