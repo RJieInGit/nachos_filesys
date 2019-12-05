@@ -13,8 +13,9 @@
 #include "kernel.h"
 #include "list.h"
 
-extern Kernel *kernel;
-extern Debug *debug;
+// global variables
+Kernel *kernel;
+Debug *debug;
 
 #endif // MAIN_H
 
