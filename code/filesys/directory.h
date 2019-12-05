@@ -21,6 +21,7 @@
 
 #define FileNameMaxLen 		9	// for simplicity, we assume 
 					// file names are <= 9 characters long
+#define INCREASE_FACTOR 2
 
 // The following class defines a "directory entry", representing a file
 // in the directory.  Each entry gives the name of the file, and where
@@ -31,6 +32,7 @@
 
 class DirectoryEntry {
   public:
+    bool isDir;
     bool inUse;				// Is this directory entry in use?
     int sector;				// Location on disk to find the 
 					//   FileHeader for this file 
@@ -63,6 +65,8 @@ class Directory {
 
     bool Add(char *name, int newSector);  // Add a file name into the directory
 
+    bool AddDirectory(char *name, int newSector);
+
     bool Remove(char *name);		// Remove a file from the directory
 
     void List(int tabs);			// Print the names of all the files
@@ -71,6 +75,7 @@ class Directory {
 					//  of the directory -- all the file
 					//  names and their contents.
     void Expand(int size);
+    bool isDirectory(char *name);
   private:
     int tableSize;			// Number of directory entries
     DirectoryEntry *table;		// Table of pairs: 

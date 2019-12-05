@@ -136,9 +136,52 @@ Directory::Add(char *name, int newSector)
             table[i].inUse = TRUE;
             strncpy(table[i].name, name, FileNameMaxLen); 
             table[i].sector = newSector;
+            table[i].isDir = false;
         return TRUE;
 	}
+
+     Expand(tableSize * INCREASE_FACTOR);        // increase capacity
+    for (int i = 0; i < tableSize; i++) {       // repeat search
+        if (!table[i].inUse) {
+            table[i].inUse = true;
+            strncpy(table[i].name, name, FileNameMaxLen); 
+            table[i].sector = newSector;
+            table[i].isDir = false;
+            return true;
+        }
+    }
+
     return FALSE;	// no space.  Fix when we have extensible files.
+}
+
+// add a subdirtory 
+bool
+Directory::AddDirectory(char *name, int newSector) {
+    if (FindIndex(name) != -1)
+        return false;
+
+    for (int i = 0; i < tableSize; i++)
+        if (!table[i].inUse) {
+            table[i].inUse = true;
+            strncpy(table[i].name, name, FileNameMaxLen); 
+            table[i].sector = newSector;
+            table[i].isDir = true;
+        return true;
+    }
+
+    Expand(tableSize * INCREASE_FACTOR);        // increase capacity
+    for (int i = 0; i < tableSize; i++) {       // repeat search
+        if (!table[i].inUse) {
+            table[i].inUse = true;
+            strncpy(table[i].name, name, FileNameMaxLen); 
+            table[i].sector = newSector;
+            table[i].isDir = true;
+            return true;
+        }
+    }
+
+    ASSERT(false);  // should not happen
+    return false;   // no space.  Fix when we have extensible files.
 }
 
 //----------------------------------------------------------------------
