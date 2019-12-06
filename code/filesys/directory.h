@@ -76,6 +76,7 @@ class Directory {
 					//  names and their contents.
     void Expand(int size);
     bool isDirectory(char *name);
+    
   private:
     int tableSize;			// Number of directory entries
     DirectoryEntry *table;		// Table of pairs: 

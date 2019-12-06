@@ -499,7 +499,7 @@ FileSystem::MakeDir(char *name, int initialSize, int wdSector)
 
 int
 FileSystem::ChangeDir(char *name, int wdSector) {
-    Directory *directory;
+    Directory *dir;
     OpenFile *dirFile;
     int sector;
 
@@ -513,10 +513,10 @@ FileSystem::ChangeDir(char *name, int wdSector) {
 
 
     dirFile = new(std::nothrow) OpenFile(wdSector);
-    directory = new(std::nothrow) Directory(NumDirEntries);
-    directory->FetchFrom(dirFile);
+    dir = new(std::nothrow) Directory(NumDirEntries);
+    dir->FetchFrom(dirFile);
 
-    if(!directory->isDirectory(name)) {
+    if(!dir->isDirectory(name)) {
         DEBUG('f', "could not find directory " << name);
         //directoryLock->Release();
         delete directory;
@@ -524,10 +524,10 @@ FileSystem::ChangeDir(char *name, int wdSector) {
         return -1;
     }
 
-    sector = directory->Find(name);
+    sector = dir->Find(name);
 
     //directoryLock->Release();
-    delete directory;
+    delete dir;
     delete dirFile;
     return sector;
 }
