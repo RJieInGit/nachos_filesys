@@ -121,6 +121,8 @@ Kernel::Initialize()
     if(fileSystem->Create("swapSpace", 0, 1)) {
 		swapSpace = fileSystem->Open("swapSpace",1);
 	}
+    fileSystem->MakeDir("bin",0,1);
+    fileSystem->MakeDir("usr",0,1);
    
 #endif // FILESYS_STUB
     postOfficeIn = new PostOfficeInput(10);
