@@ -3,6 +3,7 @@
 #define FILE_BLOCK_H
 #include "../machine/disk.h"
 #include "bitmap.h"
+#include "pbitmap.h"
 
 #define MAX_SECTOR (int)(SectorSize / sizeof(int))
 #define EMPTY_BLOCK -1

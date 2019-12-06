@@ -1,6 +1,7 @@
 #include "fileblock.h"
 #include "filehdr.h"
 #include "kernel.h"
+#include "main.h"
 
 IndirectBlock:: IndirectBlock(){
     for(int i=0;i<MAX_SECTOR;i++){
@@ -41,11 +42,11 @@ void IndirectBlock::Deallocate(PersistentBitmap *freeMap){
 }
 
 void IndirectBlock::WriteBack(int sector){
-    synchDisk->WriteSector(sector,(char *)this);
+    kernel->synchDisk->WriteSector(sector,(char *)this);
 }
 
 void IndirectBlock::FetchFrom(int sector){
-    synchDisk->ReadSector(sector,(char *)this);
+    kernel->synchDisk->ReadSector(sector,(char *)this);
 }
 
 int IndirectBlock::ByteToSector(int offset){
