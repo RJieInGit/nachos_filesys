@@ -23,6 +23,7 @@
 #include "utility.h"
 #include "filehdr.h"
 #include "directory.h"
+#include "debug.h"
 
 //----------------------------------------------------------------------
 // Directory::Directory
