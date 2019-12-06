@@ -1,7 +1,7 @@
 #include "fileblock.h"
 #include "filehdr.h"
 #include "kernel.h"
-#include "main.h"
+
 
 IndirectBlock:: IndirectBlock(){
     for(int i=0;i<MAX_SECTOR;i++){

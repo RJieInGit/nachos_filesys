@@ -4,6 +4,7 @@
 #include "../machine/disk.h"
 #include "bitmap.h"
 #include "pbitmap.h"
+#include "main.h"
 
 #define MAX_SECTOR (int)(SectorSize / sizeof(int))
 #define EMPTY_BLOCK -1
