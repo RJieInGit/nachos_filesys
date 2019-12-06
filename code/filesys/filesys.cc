@@ -45,7 +45,7 @@
 #ifndef FILESYS_STUB
 
 
-#include "../lib/debug.h"
+#include "debug.h"
 #include "copyright.h"
 #include "disk.h"
 #include "pbitmap.h"
