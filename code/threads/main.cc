@@ -296,7 +296,7 @@ main(int argc, char **argv)
       kernel->fileSystem->Print();
     }
     if (dirListFlag) {
-      kernel->fileSystem->List(2);
+      kernel->fileSystem->List(1);
     }
     if (printFileName != NULL) {
       Print(printFileName);
