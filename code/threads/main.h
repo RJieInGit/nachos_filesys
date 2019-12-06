@@ -12,6 +12,7 @@
 #include "debug.h"
 #include "kernel.h"
 #include "list.h"
+class Kernel;
 
 extern Kernel *kernel;
 extern Debug *debug;
