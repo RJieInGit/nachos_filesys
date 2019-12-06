@@ -37,6 +37,8 @@
 #include "sysdep.h"
 #include "openfile.h"
 
+
+
 #ifdef FILESYS_STUB 		// Temporarily implement file system calls as 
 				// calls to UNIX, until the real file system
 				// implementation is available
@@ -64,6 +66,8 @@ class FileSystem {
 };
 
 #else // FILESYS
+#define FreeMapSector 		0
+#define DirectorySector 	1
 class FileSystem {
   public:
     FileSystem(bool format);		// Initialize the file system.
