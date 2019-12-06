@@ -351,7 +351,7 @@ if(kernel->OpenFileCount->find(wdSector)!=kernel->OpenFileCount->end() &&
         DEBUG('f', "cannot Remove() directory\n");
         delete directory;
         delete dirFile;
-        directoryLock->Release();
+        //directoryLock->Release();
         return false;
     }
 

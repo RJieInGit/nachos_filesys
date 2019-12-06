@@ -87,7 +87,9 @@ class FileSystem {
     void List(int dirSector);			// List all the files in the file system
 
     void Print();			// List all the files and their contents
+	bool MakeDir(char *name, int initialSize, int wdSector);
 
+    int ChangeDir(char *name, int wdSector);
 OpenFile *GetFreeMapFile();   // getter method
 OpenFile *GetDirectoryFile(); // getter method
   private:
