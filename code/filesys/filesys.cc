@@ -519,7 +519,7 @@ FileSystem::ChangeDir(char *name, int wdSector) {
     if(!dir->isDirectory(name)) {
         DEBUG('f', "could not find directory " << name);
         //directoryLock->Release();
-        delete directory;
+        delete dir;
         delete dirFile;
         return -1;
     }
