@@ -131,6 +131,7 @@ OpenFile::Write(char *into, int numBytes)
    seekPosition += result;
 
    kernel->semaphoreWrite->operator[](hdrSector)->P();
+   DEBUG('f',"writing done");
    return result;
 }
 
