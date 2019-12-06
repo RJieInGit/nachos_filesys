@@ -77,6 +77,7 @@ FileHeader::Allocate(PersistentBitmap *freeMap, int fileSize)
         allocated+= sectorsInBlock;
         delete block;                              //we already write it to disk, free the memory
     }
+    printf("allocated :%d  , need :%d \n",allocated, needSectors);
     ASSERT(needSectors <=allocated);
      numBytes += fileSize;
      numSectors  += divRoundUp(fileSize, SectorSize);
