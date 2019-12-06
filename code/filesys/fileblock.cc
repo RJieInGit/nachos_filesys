@@ -1,7 +1,7 @@
 #include "fileblock.h"
 #include "filehdr.h"
 #include "kernel.h"
-#include "synch.h"
+
 
 
 IndirectBlock:: IndirectBlock(){
