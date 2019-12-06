@@ -114,12 +114,12 @@ Kernel::Initialize()
 #else
     fileSystem = new FileSystem(formatFlag);
     // swapSpace creted in the root dir
-    if(fileSystem->Create("swapSpace", 0, DirectorySector)) {
+    if(fileSystem->Create("swapSpace", 0, 1)) {
 		swapSpace = fileSystem->Open("swapSpace");
 	}
     semaphoreRead = new  std::map<int, Semaphore*>;
     semaphoreWrite = new  std::map<int, Semaphore*>;
-    readerCount  =new std::map<std::string,int>;
+    readerCount  =new std::map<int,int>;
     OpenFileCount = new std::map<int, int>;
 #endif // FILESYS_STUB
     postOfficeIn = new PostOfficeInput(10);
