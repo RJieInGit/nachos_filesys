@@ -45,14 +45,15 @@
 #ifndef FILESYS_STUB
 
 
-#include "debug.h"
 #include "copyright.h"
 #include "disk.h"
 #include "pbitmap.h"
 #include "directory.h"
 #include "filehdr.h"
 #include "filesys.h"
+#include "debug.h"
 #include "main.h"
+
 
 
 // Sectors containing the file headers for the bitmap of free sectors,
