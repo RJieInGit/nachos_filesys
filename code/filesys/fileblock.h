@@ -14,7 +14,7 @@ class IndirectBlock{
         IndirectBlock();
         int Allocate(PersistentBitmap *bitMap,int numSectors);
         
-        void Deallocate(Bitmap *bitmap);
+        void Deallocate(PersistentBitmap *bitmap);
 
         //get the fileblock from the disk
         void FetchFrom(int sectorNumber);

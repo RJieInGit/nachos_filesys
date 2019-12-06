@@ -9,9 +9,9 @@ IndirectBlock:: IndirectBlock(){
     }
 }
 
-int IndirectBlock::Allocate(PersistentBitmap *freeMap,itn numbSectors){
+int IndirectBlock::Allocate(PersistentBitmap *freeMap,int numSectors){
     DEBUG('f',"now allocating single indirct block\n");
-    if(numSectors<0 || freeMap->NumClear()<numbSectors)
+    if(numSectors<0 || freeMap->NumClear()<numSectors)
         return -1;
     DEBUG('f',"find enough sectors in disk successfully\n");
     int allocated=0;
@@ -19,8 +19,8 @@ int IndirectBlock::Allocate(PersistentBitmap *freeMap,itn numbSectors){
     for(int i=0;i<MAX_SECTOR&&allocated<numSectors;i++){
         if(dataSectors[i]!=EMPTY_BLOCK)
         continue;
-        dataSectors[i]=freeMap->Find();
-        ASSERT(datsSectors[i]!=EMPTY_BLOCK);
+        dataSectors[i]=freeMap->FindAndSet();
+        ASSERT(dataSectors[i]!=EMPTY_BLOCK);
         allocated++;
     }
     DEBUG('f',"block sectors allocated successfully\n");
