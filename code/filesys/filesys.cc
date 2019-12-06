@@ -46,7 +46,6 @@
 
 #include "../lib/debug.h"
 #include "copyright.h"
-#include "debug.h"
 #include "disk.h"
 #include "pbitmap.h"
 #include "directory.h"
