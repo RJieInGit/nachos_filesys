@@ -94,7 +94,7 @@ AddrSpace::~AddrSpace()
 bool 
 AddrSpace::Load(char *fileName) 
 {
-    OpenFile *executable = kernel->fileSystem->Open(fileName);
+    OpenFile *executable = kernel->fileSystem->Open(fileName,1);
     NoffHeader noffH;
     unsigned int size;
 
