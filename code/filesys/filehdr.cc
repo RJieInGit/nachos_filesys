@@ -192,7 +192,7 @@ FileHeader::Print()
 	printf("%d ", dataSectors[i]);
     printf("\nFile contents:\n");
     for (i = k = 0; i < numSectors; i++) {
-    if(dataSectors<0||dataSectors>NumSectors)
+    if(dataSectors[i]<0||dataSectors[i]>NumSectors)
     continue;
 	kernel->synchDisk->ReadSector(dataSectors[i], data);
         for (j = 0; (j < SectorSize) && (k < numBytes); j++, k++) {
