@@ -264,3 +264,10 @@ Directory::Expand(int size) {
     table = newTable;
     tableSize *= 2;
 }
+bool
+Directory::isDirectory(char *name) {
+    int i = FindIndex(name);
+    if(i != -1)
+        return table[i].isDir;
+    return false;
+}
