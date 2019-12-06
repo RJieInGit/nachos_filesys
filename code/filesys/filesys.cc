@@ -243,6 +243,7 @@ FileSystem::Create(char *name, int initialSize, int wdSector)
 	    if (!hdr->Allocate(freeMap, initialSize))
             	success = FALSE;	// no space on disk for data
 	    else {	
+            directory->Print();
 	    	success = TRUE;
 		// everthing worked, flush all changes back to disk
     	    	hdr->WriteBack(sector); 		
