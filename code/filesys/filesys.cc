@@ -52,6 +52,7 @@
 #include "filehdr.h"
 #include "filesys.h"
 #include "main.h"
+#include "debug.h"
 
 // Sectors containing the file headers for the bitmap of free sectors,
 // and the directory of files.  These file headers are placed in well-known 
@@ -292,7 +293,7 @@ FileSystem::Open(char *name, int wdSector)
      if(kernel->semaphoreRead->find(sector)== kernel->semaphoreRead->end())
         kernel->semaphoreRead[sector]= new Semaphore("readsemaphore",1);
       if(kernel->semaphoreWrite->find(sector)== kernel->semaphoreRead->end())
-        kernel->semaphoreWrite[sector] =new Semaphore("writesemaphore",1);
+        kernel->*semaphoreWrite[sector] =new Semaphore("writesemaphore",1);
     delete directory;
     delete dirFile;
     return openFile;				// return NULL if not found
@@ -313,7 +314,7 @@ FileSystem::Open(char *name, int wdSector)
 //----------------------------------------------------------------------
 
 bool
-FileSystem::Remove(char *name, int WdSector)
+FileSystem::Remove(char *name, int wdSector)
 { 
     Directory *directory;
     PersistentBitmap *freeMap;
@@ -333,7 +334,7 @@ FileSystem::Remove(char *name, int WdSector)
 // since we use sector num as sync map key, we cannot remove the file while someone opens it
 if(kernel->OpenFileCount->find(wdSector)!=kernel->OpenFileCount->end() && 
     kernel->OpenFileCount[wdSector]>0){
-        Debug('f',"cannot remove file, some thread still holds the openfile of it\n");
+        DEBUG('f',"cannot remove file, some thread still holds the openfile of it\n");
         return false;
     }
     OpenFile *dirFile = new(std::nothrow) OpenFile(wdSector);
@@ -434,14 +435,14 @@ FileSystem::MakeDir(char *name, int initialSize, int wdSector)
 {
     Directory *directory;
     OpenFile *dirFile;
-    BitMap *freeMap;
+    PersistentBitmap *freeMap;
     FileHeader *hdr;
     int sector;
     bool success;
 
     DEBUG('f', "Creating file %s, size %d\n", name, initialSize);
 
-    directoryLock->Acquire();
+    //directoryLock->Acquire();
     wdSector = parse_path(&name, wdSector);
     if(wdSector < 0) {
         DEBUG('f', "bad path: %s\n", name);
@@ -456,8 +457,8 @@ FileSystem::MakeDir(char *name, int initialSize, int wdSector)
     if (directory->Find(name) != -1)
       success = false;          // file is already in directory
     else {
-        diskmapLock->Acquire(); 
-        freeMap = new(std::nothrow) BitMap(NumSectors);
+        //diskmapLock->Acquire(); 
+        freeMap = new(std::nothrow) PersistentBitmap(NumSectors);
         freeMap->FetchFrom(freeMapFile);
         sector = freeMap->Find();   // find a sector to hold the file header
         if (sector == -1)       
@@ -486,9 +487,9 @@ FileSystem::MakeDir(char *name, int initialSize, int wdSector)
             delete hdr;
         }
         delete freeMap;
-        diskmapLock->Release();
+        //diskmapLock->Release();
     }
-    directoryLock->Release();
+    //directoryLock->Release();
     delete directory;
     delete dirFile;
     return success;
@@ -500,7 +501,7 @@ FileSystem::ChangeDir(char *name, int wdSector) {
     OpenFile *dirFile;
     int sector;
 
-    directoryLock->Acquire();
+    //directoryLock->Acquire();
     wdSector = parse_path(&name, wdSector);
     if(wdSector < 0) {
         DEBUG('f', "bad path: %s\n", name);
