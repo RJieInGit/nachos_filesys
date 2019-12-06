@@ -277,18 +277,20 @@ FileSystem::Open(char *name, int wdSector)
     int sector;
 
     DEBUG(dbgFile, "Opening file" << name);
+    
     wdSector = parse_path(&name, wdSector);
     if(wdSector < 0) {
         DEBUG('f', "can't open ,bad path: ");
        // directoryLock->Release();
         return false;
     }
+    printf( "wdsector: %d \n", sector);
     OpenFile *dirFile =new OpenFile(wdSector);
     directory->FetchFrom(dirFile);
     directory->Print();
     sector = directory->Find(name); 
     printf( "name : %s sector: %d \n",name, sector);
-    if (sector >= 0) 		
+    if (sector >= 0) 	{	
 	openFile = new OpenFile(sector);	// name was found in directory 
    
     // initial or update the sync map in kernel
@@ -302,6 +304,7 @@ FileSystem::Open(char *name, int wdSector)
         kernel->semaphoreRead->operator[](sector)= new Semaphore("readsemaphore",1);
       if(kernel->semaphoreWrite->find(sector)== kernel->semaphoreRead->end())
         kernel->semaphoreWrite->operator[](sector) =new Semaphore("writesemaphore",1);
+    }
     delete directory;
     delete dirFile;
     return openFile;				// return NULL if not found
