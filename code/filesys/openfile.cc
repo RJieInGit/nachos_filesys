@@ -115,6 +115,7 @@ OpenFile::Read(char *into, int numBytes)
 int
 OpenFile::Write(char *into, int numBytes)
 {    
+    DEBUG('f',"start writing to %s\n", into);
     //extend the file if necessary
     if(seekPosition + numBytes > hdr->FileLength()){
         PersistentBitmap *freeMap = new PersistentBitmap(NumSectors);
@@ -125,6 +126,7 @@ OpenFile::Write(char *into, int numBytes)
         delete freeMap;
     }
     kernel->semaphoreWrite->operator[](hdrSector)->P();
+    DEBUG('f',"entered critical aera\n");
    int result = WriteAt(into, numBytes, seekPosition);
    seekPosition += result;
 
