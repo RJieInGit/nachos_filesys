@@ -192,6 +192,8 @@ FileHeader::Print()
 	printf("%d ", dataSectors[i]);
     printf("\nFile contents:\n");
     for (i = k = 0; i < numSectors; i++) {
+    if(dataSectors<0||dataSectors>NumSectors)
+    continue;
 	kernel->synchDisk->ReadSector(dataSectors[i], data);
         for (j = 0; (j < SectorSize) && (k < numBytes); j++, k++) {
 	    if ('\040' <= data[j] && data[j] <= '\176')   // isprint(data[j])
