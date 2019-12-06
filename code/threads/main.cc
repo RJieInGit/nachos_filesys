@@ -112,8 +112,6 @@ Copy(char *from, char *to)
     OpenFile* openFile;
     int amountRead, fileLength;
     char *buffer;
-    char * copy = (char*)malloc(strlen(to) + 1); 
-    strcpy(copy, to);
 // Open UNIX file
     if ((fd = OpenForReadWrite(from,FALSE)) < 0) {       
         printf("Copy: couldn't open input file %s\n", from);
@@ -132,8 +130,7 @@ Copy(char *from, char *to)
         Close(fd);
         return;
     }
-    printf("%s    %s\n",copy,to);
-    openFile = kernel->fileSystem->Open(copy,1);
+    openFile = kernel->fileSystem->Open(to,1);
     ASSERT(openFile != NULL);
     
 // Copy the data in TransferSize chunks
