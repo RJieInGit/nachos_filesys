@@ -53,7 +53,7 @@ Thread::Thread(char* threadName)
     finishedChild = new List<int>();
     PID = threadNum++; //start from 0
     //the curr directory point to /root
-    wdSector= 1；
+    wdSector = 1;
     cout<<"Thread with PID "<< PID <<" is generated!"<<endl;
 }
 
