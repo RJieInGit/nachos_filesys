@@ -91,20 +91,20 @@ OpenFile::Read(char *into, int numBytes)
 {
     Debug('f',"reading file\n");
     Debug('f',"semaphore Key: hdrSector(%d)",hdrSector);
-   kernel—> semaphoreRead[hdrSector]->P();
+   kernel—> semaphoreRead->operator[](hdrSector)->P();
    if(kernel->readerCount->find(hdrSector) != kernel->readerCount->end())
-        kernel->readerCount[hdrSector]= kernel->readerCount[hdrSector]+1;
-   if(kernel->readerCount[hdrSector]==1)
-   kernel->semaphoreWrite[hdrSector]->P();
-   kernel->semaphoreRead[hdrSector]->V();
+        kernel->readerCount->operator[](hdrSector)= kernel->readerCount->operator[](hdrSector)+1;
+   if(kernel->readerCount->operator[](hdrSector)==1)
+   kernel->semaphoreWrite->operator[](hdrSector)->P();
+   kernel->semaphoreRead->operator[](hdrSector)->V();
 
    int result = ReadAt(into, numBytes, seekPosition);
    seekPosition += result;
 
-   kernel->semaphoreRead[hdrSector]->P();
+   kernel->semaphoreRead->operator[](hdrSector)->P();
    if(kernel->readerCount->find(hdrSector) != kernel->readerCount->end())
-        kernel->readerCount[hdrSector]= kernel->readerCount[hdrSector]-1;
-    if(kernel->readerCount[hdrSector]==0)
+        kernel->readerCount->operator[](hdrSector)= kernel->readerCount->operator[](hdrSector)-1;
+    if(kernel->readerCount->operator[](hdrSector)==0)
         kernel->semaphoreWrite->operator[](hdrSector)->V();
    kernel->semaphoreRead->operator[](hdrSector)->V();
    return result;
