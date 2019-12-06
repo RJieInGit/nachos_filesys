@@ -110,10 +110,11 @@ Copy(char *from, char *to)
     
 // Copy the data in TransferSize chunks
     buffer = new char[TransferSize];
+    printf("here\n");
     while ((amountRead=ReadPartial(fd, buffer, sizeof(char)*TransferSize)) > 0)
         openFile->Write(buffer, amountRead);    
     delete [] buffer;
-
+    printf("here2\n");
 // Close the UNIX and the Nachos files
     delete openFile;
     Close(fd);
