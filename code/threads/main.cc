@@ -71,6 +71,32 @@ Cleanup(int x)
 //-------------------------------------------------------------------
 static const int TransferSize = 128;
 
+//----------------------------------------------------------------------
+// Print
+//      Print the contents of the Nachos file "name".
+//----------------------------------------------------------------------
+
+void
+Print(char *name)
+{
+    OpenFile *openFile;    
+    int i, amountRead;
+    char *buffer;
+
+    if ((openFile = kernel->fileSystem->Open(name,1)) == NULL) {
+        printf("Print: unable to open file %s\n", name);
+        return;
+    }
+    
+    buffer = new char[TransferSize];
+    while ((amountRead = openFile->Read(buffer, TransferSize)) > 0)
+        for (i = 0; i < amountRead; i++)
+            printf("%c", buffer[i]);
+    delete [] buffer;
+
+    delete openFile;            // close the Nachos file
+    return;
+}
 
 #ifndef FILESYS_STUB
 //----------------------------------------------------------------------
@@ -123,32 +149,7 @@ Copy(char *from, char *to)
 
 #endif // FILESYS_STUB
 
-//----------------------------------------------------------------------
-// Print
-//      Print the contents of the Nachos file "name".
-//----------------------------------------------------------------------
 
-void
-Print(char *name)
-{
-    OpenFile *openFile;    
-    int i, amountRead;
-    char *buffer;
-
-    if ((openFile = kernel->fileSystem->Open(name,1)) == NULL) {
-        printf("Print: unable to open file %s\n", name);
-        return;
-    }
-    
-    buffer = new char[TransferSize];
-    while ((amountRead = openFile->Read(buffer, TransferSize)) > 0)
-        for (i = 0; i < amountRead; i++)
-            printf("%c", buffer[i]);
-    delete [] buffer;
-
-    delete openFile;            // close the Nachos file
-    return;
-}
 
 //----------------------------------------------------------------------
 // RunUserProg
