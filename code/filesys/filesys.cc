@@ -204,7 +204,7 @@ FileSystem::FileSystem(bool format)
 
 //dirSector should be the dirSectory of current dirtory
 bool
-FileSystem::Create(char *name, int initialSize, int dirSector)
+FileSystem::Create(char *name, int initialSize, int wdSector)
 {
     Directory *directory;
     PersistentBitmap *freeMap;
@@ -218,8 +218,8 @@ FileSystem::Create(char *name, int initialSize, int dirSector)
     //directoryLock->Acquire();
     wdSector = parse_path(&name, wdSector);
     if(wdSector < 0) {
-        DEBUG('f', "bad path: %s\n", name);
-        directoryLock->Release();
+        DEBUG('f', "bad path: ");
+        //directoryLock->Release();
         return false;
     }
     directory = new Directory(NumDirEntries);
@@ -276,8 +276,8 @@ FileSystem::Open(char *name, int wdSector)
     DEBUG(dbgFile, "Opening file" << name);
     wdSector = parse_path(&name, wdSector);
     if(wdSector < 0) {
-        DEBUG('f', "bad path: %s\n", name);
-        directoryLock->Release();
+        DEBUG('f', "can't open ,bad path: ");
+       // directoryLock->Release();
         return false;
     }
     OpenFile *dirFile =new OpenFile(wdSector);
@@ -287,15 +287,15 @@ FileSystem::Open(char *name, int wdSector)
 	openFile = new OpenFile(sector);	// name was found in directory 
     // initial or update the sync map in kernel
     if(kernel->OpenFileCount->find(sector)== kernel->OpenFileCount->end())
-    kernel->OpenFileCount[sector]=1;
+    kernel->(*OpenFileCount)[sector]=1;
     else
     {
-        kernel->OpenFileCount[sector]=kernel->OpenFileCount[sector]+1;
+        kernel->(*OpenFileCount)[sector]=kernel->OpenFileCount[sector]+1;
     }
      if(kernel->semaphoreRead->find(sector)== kernel->semaphoreRead->end())
-        kernel->semaphoreRead[sector]= new Semaphore("readsemaphore",1);
+        kernel->(*semaphoreRead)[sector]= new Semaphore("readsemaphore",1);
       if(kernel->semaphoreWrite->find(sector)== kernel->semaphoreRead->end())
-        kernel->*semaphoreWrite[sector] =new Semaphore("writesemaphore",1);
+        kernel->(*semaphoreWrite)[sector] =new Semaphore("writesemaphore",1);
     delete directory;
     delete dirFile;
     return openFile;				// return NULL if not found
@@ -325,11 +325,11 @@ FileSystem::Remove(char *name, int wdSector)
     
     
 
-     DEBUG('r', "starting filesystem remove\n");
+     DEBUG('f', "starting filesystem remove\n");
     //directoryLock->Acquire();
     wdSector = parse_path(&name, wdSector);
     if(wdSector < 0) {
-        DEBUG('f', "bad path: %s\n", name);
+        DEBUG('f', "bad path: %s\n";
         //directoryLock->Release();
         return false;
     }
@@ -442,12 +442,12 @@ FileSystem::MakeDir(char *name, int initialSize, int wdSector)
     int sector;
     bool success;
 
-    DEBUG('f', "Creating file %s, size %d\n", name, initialSize);
+    DEBUG('f', "Creating file" << name << "size" <<  initialSize);
 
     //directoryLock->Acquire();
     wdSector = parse_path(&name, wdSector);
     if(wdSector < 0) {
-        DEBUG('f', "bad path: %s\n", name);
+        DEBUG('f', "bad path: "<< name);
         //directoryLock->Release();
         return false;
     }
@@ -506,7 +506,7 @@ FileSystem::ChangeDir(char *name, int wdSector) {
     //directoryLock->Acquire();
     wdSector = parse_path(&name, wdSector);
     if(wdSector < 0) {
-        DEBUG('f', "bad path: %s\n", name);
+        DEBUG('f', "bad path: "<< name);
         //directoryLock->Release();
         return -1;
     }
@@ -517,7 +517,7 @@ FileSystem::ChangeDir(char *name, int wdSector) {
     directory->FetchFrom(dirFile);
 
     if(!directory->isDirectory(name)) {
-        DEBUG('f', "could not find directory %s\n", name);
+        DEBUG('f', "could not find directory " << name);
         //directoryLock->Release();
         delete directory;
         delete dirFile;
