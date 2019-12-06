@@ -106,6 +106,7 @@ Copy(char *from, char *to)
     }
     
     openFile = kernel->fileSystem->Open(to,1);
+    print("here 1!!!\n");
     ASSERT(openFile != NULL);
     
 // Copy the data in TransferSize chunks
