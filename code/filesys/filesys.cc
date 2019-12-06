@@ -233,7 +233,7 @@ FileSystem::Create(char *name, int initialSize, int wdSector)
     else {	
         freeMap = new PersistentBitmap(freeMapFile,NumSectors);
         sector = freeMap->FindAndSet();	// find a sector to hold the file header
-        printf("here!!!!! and sector : %d , name :%s \n",sector,name);
+       // printf("here!!!!! and sector : %d , name :%s \n",sector,name);
     	if (sector == -1) 		
             success = FALSE;		// no free block for file header 
         else if (!directory->Add(name, sector))
@@ -243,7 +243,7 @@ FileSystem::Create(char *name, int initialSize, int wdSector)
 	    if (!hdr->Allocate(freeMap, initialSize))
             	success = FALSE;	// no space on disk for data
 	    else {	
-            directory->Print();
+            //directory->Print();
 	    	success = TRUE;
 		// everthing worked, flush all changes back to disk
     	    	hdr->WriteBack(sector); 		
@@ -285,6 +285,7 @@ FileSystem::Open(char *name, int wdSector)
     }
     OpenFile *dirFile =new OpenFile(wdSector);
     directory->FetchFrom(dirFile);
+    directory->Print();
     sector = directory->Find(name); 
     printf( "name : %s sector: %d \n",name, sector);
     if (sector >= 0) 		
