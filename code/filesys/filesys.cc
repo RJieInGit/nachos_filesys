@@ -284,7 +284,7 @@ FileSystem::Open(char *name, int wdSector)
     OpenFile *dirFile =new OpenFile(wdSector);
     directory->FetchFrom(dirFile);
     sector = directory->Find(name); 
-    printf("%s name\n");
+    directory->List(0);
     if (sector >= 0) 		
 	openFile = new OpenFile(sector);	// name was found in directory 
    
