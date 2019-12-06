@@ -290,7 +290,7 @@ FileSystem::Open(char *name, int wdSector)
     kernel->OpenFileCount->operator[](sector)=1;
     else
     {
-        kernel->OpenFileCount->operator[](sector)=kernel->OpenFileCount[sector]+1;
+        kernel->OpenFileCount->operator[](sector)=kernel->OpenFileCount->operator[](sector)+1;
     }
      if(kernel->semaphoreRead->find(sector)== kernel->semaphoreRead->end())
         kernel->semaphoreRead->operator[](sector)= new Semaphore("readsemaphore",1);
@@ -335,7 +335,7 @@ FileSystem::Remove(char *name, int wdSector)
     }
 // since we use sector num as sync map key, we cannot remove the file while someone opens it
 if(kernel->OpenFileCount->find(wdSector)!=kernel->OpenFileCount->end() && 
-    kernel->OpenFileCount->operator[](wdSector)>0){
+    (kernel->OpenFileCount->operator[](wdSector)) >0){
         DEBUG('f',"cannot remove file, some thread still holds the openfile of it\n");
         return false;
     }
