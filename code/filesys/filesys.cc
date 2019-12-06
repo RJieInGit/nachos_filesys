@@ -44,6 +44,7 @@
 // of liability and disclaimer of warranty provisions.
 #ifndef FILESYS_STUB
 
+#include "../lib/debug.h"
 #include "copyright.h"
 #include "debug.h"
 #include "disk.h"
@@ -52,7 +53,7 @@
 #include "filehdr.h"
 #include "filesys.h"
 #include "main.h"
-#include "debug.h"
+
 
 // Sectors containing the file headers for the bitmap of free sectors,
 // and the directory of files.  These file headers are placed in well-known 
@@ -446,7 +447,7 @@ FileSystem::MakeDir(char *name, int initialSize, int wdSector)
     wdSector = parse_path(&name, wdSector);
     if(wdSector < 0) {
         DEBUG('f', "bad path: %s\n", name);
-        directoryLock->Release();
+        //directoryLock->Release();
         return false;
     }
 
@@ -460,7 +461,7 @@ FileSystem::MakeDir(char *name, int initialSize, int wdSector)
         //diskmapLock->Acquire(); 
         freeMap = new(std::nothrow) PersistentBitmap(NumSectors);
         freeMap->FetchFrom(freeMapFile);
-        sector = freeMap->Find();   // find a sector to hold the file header
+        sector = freeMap->FindAndSet();   // find a sector to hold the file header
         if (sector == -1)       
             success = false;        // no free block for file header 
         else if (!directory->AddDirectory(name, sector))
@@ -505,7 +506,7 @@ FileSystem::ChangeDir(char *name, int wdSector) {
     wdSector = parse_path(&name, wdSector);
     if(wdSector < 0) {
         DEBUG('f', "bad path: %s\n", name);
-        directoryLock->Release();
+        //directoryLock->Release();
         return -1;
     }
 
@@ -516,7 +517,7 @@ FileSystem::ChangeDir(char *name, int wdSector) {
 
     if(!directory->isDirectory(name)) {
         DEBUG('f', "could not find directory %s\n", name);
-        directoryLock->Release();
+        //directoryLock->Release();
         delete directory;
         delete dirFile;
         return -1;
@@ -524,7 +525,7 @@ FileSystem::ChangeDir(char *name, int wdSector) {
 
     sector = directory->Find(name);
 
-    directoryLock->Release();
+    //directoryLock->Release();
     delete directory;
     delete dirFile;
     return sector;
