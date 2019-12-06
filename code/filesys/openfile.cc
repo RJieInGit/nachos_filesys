@@ -56,7 +56,7 @@ OpenFile::OpenFile(int sector)
 OpenFile::~OpenFile()
 {
     delete hdr;
-    kernel-> OpenFileCount[hdrSector] = kernel->OpenFileCount[hdrSector]-1;
+    kernel-> OpenFileCount->operator[](hdrSector) = kernel->OpenFileCount->operator[](hdrSector)-1;
 }
 
 //----------------------------------------------------------------------
@@ -90,8 +90,8 @@ int
 OpenFile::Read(char *into, int numBytes)
 {
     Debug('f',"reading file\n");
-    Debug('f',"semaphore Key: hdrSector(%d)",hdrSector);
-   kernel—> semaphoreRead->operator[](hdrSector)->P();
+    Debug('f',"semaphore Key: hdrSector:"<<hdrSector);
+   kernel—>semaphoreRead->operator[](hdrSector)->P();
    if(kernel->readerCount->find(hdrSector) != kernel->readerCount->end())
         kernel->readerCount->operator[](hdrSector)= kernel->readerCount->operator[](hdrSector)+1;
    if(kernel->readerCount->operator[](hdrSector)==1)
