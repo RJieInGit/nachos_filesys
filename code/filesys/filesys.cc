@@ -214,7 +214,7 @@ FileSystem::Create(char *name, int initialSize, int wdSector)
     bool success;
     
 
-    DEBUG(dbgFile, "Creating file " << name << " size " << initialSize);
+    DEBUG(dbgFile, "Creating file  " << name << " size   " << initialSize);
 
     //directoryLock->Acquire();
     wdSector = parse_path(&name, wdSector);
