@@ -40,7 +40,7 @@ OpenFile::OpenFile(int sector)
         kernel->OpenFileCount->operator[](hdrSector)=kernel->OpenFileCount->operator[](hdrSector)+1;
     }
     
-
+    printf("here\n");
     if(kernel->readerCount->find(hdrSector) == kernel->readerCount->end())
     kernel->readerCount->operator[](sector)=0;
     if(kernel->semaphoreWrite->find(hdrSector) == kernel->semaphoreWrite->end())
