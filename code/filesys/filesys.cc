@@ -335,7 +335,7 @@ FileSystem::Remove(char *name, int wdSector)
     }
 // since we use sector num as sync map key, we cannot remove the file while someone opens it
 if(kernel->OpenFileCount->find(wdSector)!=kernel->OpenFileCount->end() && 
-    kernel->OpenFileCount[wdSector]>0){
+    kernel->OpenFileCount->operator[](wdSector)>0){
         DEBUG('f',"cannot remove file, some thread still holds the openfile of it\n");
         return false;
     }
