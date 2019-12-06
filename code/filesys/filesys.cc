@@ -284,9 +284,10 @@ FileSystem::Open(char *name, int wdSector)
     OpenFile *dirFile =new OpenFile(wdSector);
     directory->FetchFrom(dirFile);
     sector = directory->Find(name); 
+    printf("%s name\n");
     if (sector >= 0) 		
 	openFile = new OpenFile(sector);	// name was found in directory 
-    ASSERT(openFile!=NULL);
+   
     // initial or update the sync map in kernel
     if(kernel->OpenFileCount->find(sector)== kernel->OpenFileCount->end())
     kernel->OpenFileCount->operator[](sector)=1;
