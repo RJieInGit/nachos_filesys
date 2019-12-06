@@ -59,7 +59,7 @@ FileHeader::Allocate(PersistentBitmap *freeMap, int fileSize)
     DEBUG('f',"now start file header allocation\n");
    
     int needSectors  = divRoundUp(fileSize, SectorSize);
-    if (freeMap->NumClear() < numSectors)
+    if (freeMap->NumClear() < needSectors)
 	return FALSE;		// not enough space
     DEBUG('f',"enough space for the file\n");
     IndirectBlock *block;
