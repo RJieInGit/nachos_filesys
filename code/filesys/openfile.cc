@@ -28,6 +28,7 @@
 
 OpenFile::OpenFile(int sector)
 { 
+    DEBUG('f',"start open file sectornum :"<< sector) 
     hdr = new FileHeader;
     hdr->FetchFrom(sector);
     seekPosition = 0;
@@ -46,6 +47,7 @@ OpenFile::OpenFile(int sector)
     kernel->semaphoreWrite->operator[](sector) = new Semaphore("write",1);
     if(kernel->semaphoreRead->find(hdrSector) == kernel->semaphoreRead->end())
     kernel->semaphoreRead->operator[](sector) = new Semaphore("read",1);
+    DEBUG('f',"open file successfully\n");
 }
 
 //----------------------------------------------------------------------

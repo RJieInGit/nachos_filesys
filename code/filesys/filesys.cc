@@ -138,9 +138,9 @@ FileSystem::FileSystem(bool format)
 
         DEBUG(dbgFile, "Writing headers back to disk.");
 	mapHdr->WriteBack(FreeMapSector);    
-    printf("here \n");
 	dirHdr->WriteBack(DirectorySector);
 
+    
     // OK to open the bitmap and directory files now
     // The file system operations assume these two files are left open
     // while Nachos is running.
