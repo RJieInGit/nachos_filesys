@@ -115,7 +115,7 @@ OpenFile::Read(char *into, int numBytes)
 int
 OpenFile::Write(char *into, int numBytes)
 {    
-    DEBUG('f',"start writing to %s\n", into);
+    DEBUG('f',"start writing to " << into);
     //extend the file if necessary
     if(seekPosition + numBytes > hdr->FileLength()){
         PersistentBitmap *freeMap = new PersistentBitmap(NumSectors);
