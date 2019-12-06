@@ -112,15 +112,16 @@ Kernel::Initialize()
 		swapSpace = fileSystem->Open("swapSpace");
 	}
 #else
+    semaphoreRead = new  std::map<int, Semaphore*>;
+    semaphoreWrite = new  std::map<int, Semaphore*>;
+    readerCount  =new std::map<int,int>;
+    OpenFileCount = new std::map<int, int>;
     fileSystem = new FileSystem(formatFlag);
     // swapSpace creted in the root dir, the sector number of root directory is 1
     if(fileSystem->Create("swapSpace", 0, 1)) {
 		swapSpace = fileSystem->Open("swapSpace",1);
 	}
-    semaphoreRead = new  std::map<int, Semaphore*>;
-    semaphoreWrite = new  std::map<int, Semaphore*>;
-    readerCount  =new std::map<int,int>;
-    OpenFileCount = new std::map<int, int>;
+   
 #endif // FILESYS_STUB
     postOfficeIn = new PostOfficeInput(10);
     postOfficeOut = new PostOfficeOutput(reliability);
