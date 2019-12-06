@@ -1,6 +1,7 @@
 #include "fileblock.h"
 #include "filehdr.h"
 #include "kernel.h"
+#include "synchdisk.h"
 
 
 

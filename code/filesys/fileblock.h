@@ -2,7 +2,6 @@
 #ifndef FILE_BLOCK_H
 #define FILE_BLOCK_H
 #include "main.h"
-#include "synch.h"
 #include "../machine/disk.h"
 #include "bitmap.h"
 #include "pbitmap.h"
