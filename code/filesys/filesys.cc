@@ -138,7 +138,7 @@ FileSystem::FileSystem(bool format)
 
         DEBUG(dbgFile, "Writing headers back to disk.");
 	mapHdr->WriteBack(FreeMapSector);    
-    print("here \n");
+    printf("here \n");
 	dirHdr->WriteBack(DirectorySector);
 
     // OK to open the bitmap and directory files now
