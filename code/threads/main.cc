@@ -117,6 +117,7 @@ Copy(char *from, char *to)
 // Close the UNIX and the Nachos files
     delete openFile;
     Close(fd);
+    kernel->fileSystem->Print();
 }
 
 #endif // FILESYS_STUB
