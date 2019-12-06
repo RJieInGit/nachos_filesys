@@ -65,6 +65,7 @@ FileHeader::Allocate(PersistentBitmap *freeMap, int fileSize)
     IndirectBlock *block;
     int allocated=0;
     for (int i = 0; i < numSectors && allocated<needSectors; i++) {
+        printf("here\n");
         block = new IndirectBlock();
         if(dataSectors[i] ==EMPTY_BLOCK)
             dataSectors[i]= freeMap->FindAndSet();
