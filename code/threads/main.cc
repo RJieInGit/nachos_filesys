@@ -293,7 +293,7 @@ main(int argc, char **argv)
       kernel->fileSystem->Print();
     }
     if (dirListFlag) {
-      kernel->fileSystem->List();
+      kernel->fileSystem->List(0);
     }
     if (printFileName != NULL) {
       Print(printFileName);
