@@ -75,7 +75,7 @@ int parse_path(char **path, int wdSector) {
     std::string cur_path(*path), dirname;
     std::string::size_type i;
     while((i = cur_path.find("/")) != std::string::npos) {
-        printf("sector number :%d \n",wdsector);
+        printf("sector number :%d \n",wdSector);
         dirname = cur_path.substr(0, i);
         cur_path = cur_path.substr(i+1, cur_path.size());
 
