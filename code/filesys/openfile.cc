@@ -33,19 +33,19 @@ OpenFile::OpenFile(int sector)
     seekPosition = 0;
     hdrSector = sector;
     if(kernel->OpenFileCount->find(hdrSector) == kernel->OpenFileCount->end())
-    kernel->OpenFileCount[hdrSector]=0;
+    kernel->OpenFileCount->operator[](hdrSector)=0;
     else
     {
-        kernel->OpenFileCount[hdrSector]=kernel->OpenFileCount[hdrSector]+1;
+        kernel->OpenFileCount->operator[](hdrSector)=kernel->OpenFileCount->operator[](hdrSector)+1;
     }
     
 
     if(kernel->readerCount->find(hdrSector) == kernel->readerCount->end())
-    kernel->readerCount[sector]=0;
+    kernel->readerCount->operator[](sector)=0;
     if(kernel->semaphoreWrite->find(hdrSector) == kernel->semaphoreWrite->end())
-    kernel->semaphoreWrite[sector] = new Semaphore("write",1);
+    kernel->semaphoreWrite->operator[](sector) = new Semaphore("write",1);
     if(kernel->semaphoreRead->find(hdrSector) == kernel->semaphoreRead->end())
-    kernel->semaphoreRead[sector] = new Semaphore("read",1);
+    kernel->semaphoreRead->operator[](sector) = new Semaphore("read",1);
 }
 
 //----------------------------------------------------------------------
@@ -89,9 +89,9 @@ OpenFile::Seek(int position)
 int
 OpenFile::Read(char *into, int numBytes)
 {
-    Debug('f',"reading file\n");
-    Debug('f',"semaphore Key: hdrSector:"<<hdrSector);
-   kernel—>semaphoreRead->operator[](hdrSector)->P();
+    DEBUG('f',"reading file\n");
+    DEBUG('f',"semaphore Key: hdrSector:" << hdrSector);
+   kernel->semaphoreRead->operator[](hdrSector)->P();
    if(kernel->readerCount->find(hdrSector) != kernel->readerCount->end())
         kernel->readerCount->operator[](hdrSector)= kernel->readerCount->operator[](hdrSector)+1;
    if(kernel->readerCount->operator[](hdrSector)==1)
