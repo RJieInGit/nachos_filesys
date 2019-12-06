@@ -88,7 +88,7 @@ int parse_path(char **path, int wdSector) {
         delete dir;
         delete dirFile;
     }
-
+    printf("sector number :%d \n",wdSector);
     char *filename = new char[cur_path.size() + 1];
     std::copy(cur_path.begin(), cur_path.end(), filename);
     filename[cur_path.size()] = '\0';
