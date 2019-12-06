@@ -219,7 +219,7 @@ OpenFile::WriteAt(char *from, int numBytes, int position)
     if (!lastAligned && ((firstSector != lastSector) || firstAligned))
         ReadAt(&buf[(lastSector - firstSector) * SectorSize], 
 				SectorSize, lastSector * SectorSize);	
-   printf("here3\n");
+   
 // copy in the bytes we want to change 
     bcopy(from, &buf[position - (firstSector * SectorSize)], numBytes);
 
@@ -227,6 +227,7 @@ OpenFile::WriteAt(char *from, int numBytes, int position)
     for (i = firstSector; i <= lastSector; i++)	
         kernel->synchDisk->WriteSector(hdr->ByteToSector(i * SectorSize), 
 					&buf[(i - firstSector) * SectorSize]);
+    printf("here3\n");
     delete [] buf;
     return numBytes;
 }
