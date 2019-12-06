@@ -132,7 +132,7 @@ Copy(char *from, char *to)
         Close(fd);
         return;
     }
-    
+    printf("%s    %s",copy,to);
     openFile = kernel->fileSystem->Open(copy,1);
     ASSERT(openFile != NULL);
     
