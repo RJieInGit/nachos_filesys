@@ -112,8 +112,8 @@ Copy(char *from, char *to)
     OpenFile* openFile;
     int amountRead, fileLength;
     char *buffer;
-    char * copy = malloc(strlen(to) + 1); 
-    strcpy(copy, original);
+    char * copy = (char*)malloc(strlen(to) + 1); 
+    strcpy(copy, to);
 // Open UNIX file
     if ((fd = OpenForReadWrite(from,FALSE)) < 0) {       
         printf("Copy: couldn't open input file %s\n", from);
