@@ -140,7 +140,7 @@ FileSystem::FileSystem(bool format)
 	mapHdr->WriteBack(FreeMapSector);    
 	dirHdr->WriteBack(DirectorySector);
 
-    
+
     // OK to open the bitmap and directory files now
     // The file system operations assume these two files are left open
     // while Nachos is running.
@@ -286,6 +286,7 @@ FileSystem::Open(char *name, int wdSector)
     sector = directory->Find(name); 
     if (sector >= 0) 		
 	openFile = new OpenFile(sector);	// name was found in directory 
+    ASSERT(openFile!=NULL);
     // initial or update the sync map in kernel
     if(kernel->OpenFileCount->find(sector)== kernel->OpenFileCount->end())
     kernel->OpenFileCount->operator[](sector)=1;
