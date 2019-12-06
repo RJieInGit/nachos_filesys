@@ -287,15 +287,15 @@ FileSystem::Open(char *name, int wdSector)
 	openFile = new OpenFile(sector);	// name was found in directory 
     // initial or update the sync map in kernel
     if(kernel->OpenFileCount->find(sector)== kernel->OpenFileCount->end())
-    kernel->(*OpenFileCount)[sector]=1;
+    kernel->OpenFileCount[](sector)=1;
     else
     {
-        kernel->(*OpenFileCount)[sector]=kernel->OpenFileCount[sector]+1;
+        kernel->OpenFileCount[](sector)=kernel->OpenFileCount[sector]+1;
     }
      if(kernel->semaphoreRead->find(sector)== kernel->semaphoreRead->end())
-        kernel->(*semaphoreRead)[sector]= new Semaphore("readsemaphore",1);
+        kernel->semaphoreRead[](sector)= new Semaphore("readsemaphore",1);
       if(kernel->semaphoreWrite->find(sector)== kernel->semaphoreRead->end())
-        kernel->(*semaphoreWrite)[sector] =new Semaphore("writesemaphore",1);
+        kernel->semaphoreWrite[](sector) =new Semaphore("writesemaphore",1);
     delete directory;
     delete dirFile;
     return openFile;				// return NULL if not found
@@ -329,7 +329,7 @@ FileSystem::Remove(char *name, int wdSector)
     //directoryLock->Acquire();
     wdSector = parse_path(&name, wdSector);
     if(wdSector < 0) {
-        DEBUG('f', "bad path: %s\n";
+        DEBUG('f', "bad path: %s\n");
         //directoryLock->Release();
         return false;
     }
