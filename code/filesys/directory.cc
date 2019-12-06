@@ -219,6 +219,7 @@ Directory::List(int tabs)
             printf("%s\n", table[i].name);
             if(table[i].isDir && strcmp(table[i].name, ".") && strcmp(table[i].name, "..")) {
                 Directory *dir = new(std::nothrow) Directory(10);
+                ASSERT(table[i].sector!=-1);
                 OpenFile *dirFile = new(std::nothrow) OpenFile(table[i].sector);
                 dir->FetchFrom(dirFile);
                 dir->List(tabs + 1);
