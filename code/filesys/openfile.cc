@@ -130,7 +130,7 @@ OpenFile::Write(char *into, int numBytes)
    int result = WriteAt(into, numBytes, seekPosition);
    seekPosition += result;
 
-   kernel->semaphoreWrite->operator[](hdrSector)->P();
+   kernel->semaphoreWrite->operator[](hdrSector)->V();
    DEBUG('f',"writing done");
    return result;
 }
@@ -227,7 +227,6 @@ OpenFile::WriteAt(char *from, int numBytes, int position)
     for (i = firstSector; i <= lastSector; i++)	
         kernel->synchDisk->WriteSector(hdr->ByteToSector(i * SectorSize), 
 					&buf[(i - firstSector) * SectorSize]);
-    printf("here3\n");
     delete [] buf;
     return numBytes;
 }
