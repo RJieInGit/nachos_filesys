@@ -91,7 +91,7 @@ int SysWrite(int addr, int size, OpenFileId id){
     char *buffer = LoadStringFromMemory(addr);     // grab buffer argument from register    
     if(buffer == NULL)     // error bad input
         return 0;
-    if(id == ConsoleOutput) {                                       // if we want to Write to ConsoleOutput, use the SynchConsole
+    if(id == ConsoleOutputID) {                                       // if we want to Write to ConsoleOutput, use the SynchConsole
         
         //ioLock->Acquire();
         char *curChar = buffer;                                     // iterate over the writebuffer and write out each character to ConsoleOutput
