@@ -158,6 +158,7 @@ ASSERT(false);  // should not happen
 // add a subdirtory 
 bool
 Directory::AddDirectory(char *name, int newSector) {
+    DEBUG('f',"now start add directory \n");
     if (FindIndex(name) != -1)
         return false;
 
