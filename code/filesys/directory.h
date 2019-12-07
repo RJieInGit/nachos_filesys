@@ -76,6 +76,7 @@ class Directory {
 					//  names and their contents.
     void Expand(int size);
     bool isDirectory(char *name);
+    char* GetNameBySector(int sector);
     char* GetFullPath(int sector);
     
   private:

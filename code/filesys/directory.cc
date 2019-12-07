@@ -278,6 +278,14 @@ Directory::isDirectory(char *name) {
     return false;
 }
 
+char *Directory::GetNameBySector(int sector)
+{
+    for (int i = 0; i < tableSize; i++)
+        if (table[i].sector == sector)
+            return table[i].name;
+    return "";
+}
+
 char* Directory::GetFullPath(int sector)
 {
     int preSector = Find("..");
