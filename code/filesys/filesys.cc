@@ -234,9 +234,11 @@ FileSystem::Create(char *name, int initialSize, int wdSector)
     else {	
         freeMap = new PersistentBitmap(freeMapFile,NumSectors);
         sector = freeMap->FindAndSet();	// find a sector to hold the file header
-       // printf("here!!!!! and sector : %d , name :%s \n",sector,name);
-    	if (sector == -1) 		
+        printf("here!!!!! and sector : %d , name :%s \n",sector,name);
+    	if (sector == -1) 		{
             success = FALSE;		// no free block for file header 
+            printf("directroy add not exected\n");
+        }
         else if (!directory->Add(name, sector))
             success = FALSE;	// no space in directory
 	else {
