@@ -76,6 +76,7 @@ class Directory {
 					//  names and their contents.
     void Expand(int size);
     bool isDirectory(char *name);
+    char* GetFullPath(int sector);
     
   private:
     int tableSize;			// Number of directory entries

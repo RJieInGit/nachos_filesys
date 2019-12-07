@@ -110,11 +110,15 @@ class Thread {
 	//Program Assignment 2
 	int PID;
 	Thread* father;
+  int waitingFor;
+  std::map<int, int> *childrenResult;
 	List<Thread*>* childList;
     List<int>* finishedChild;
 
     int wdSector;
     std:: string currPath;
+// preprocess file table 
+    FileVector *fileVector;
 
   private:
     // some of the private data for this class is listed above

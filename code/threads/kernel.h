@@ -72,7 +72,10 @@ class Kernel {
     // a file can only be removed and its sectors be reallocated if no thread is currenty opening it
     std::map<int, int> *OpenFileCount;
     
-
+#ifndef FILESYS_STUB
+    FileTable * globalFileTable;
+  #endif
+List<Thread *> *waitingChildrenList;
     //page fault
     OpenFile* swapSpace;
     int swapSpace_counter;

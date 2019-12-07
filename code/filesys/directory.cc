@@ -277,3 +277,30 @@ Directory::isDirectory(char *name) {
         return table[i].isDir;
     return false;
 }
+
+char* Directory::GetFullPath(int sector)
+{
+    int preSector = Find("..");
+    ;
+    Directory *preDir;
+    OpenFile *preDirFile;
+    std::string path = "";
+    std::string delimeter = "/";
+
+    while (preSector != -1)
+    {
+        preDir = new Directory(10);
+        preDirFile = new OpenFile(preSector);
+        preDir->FetchFrom(preDirFile);
+        std::string currentName = std::string(preDir->GetNameBySector(sector));
+
+        path = currentName + delimeter +  path;
+
+        sector = preSector;
+        preSector = preDir->Find("..");
+        delete preDirFile;
+        delete preDir;
+    }
+    path = delimeter + path;
+    return (char *) path.c_str();
+}

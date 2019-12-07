@@ -91,6 +91,8 @@ class FileSystem {
 	bool MakeDir(char *name, int initialSize, int wdSector);
 
     int ChangeDir(char *name, int wdSector);
+
+	int PrintFullPath(int wdSector);
 OpenFile *GetFreeMapFile();   // getter method
 OpenFile *GetDirectoryFile(); // getter method
   private:

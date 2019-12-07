@@ -542,6 +542,23 @@ FileSystem::ChangeDir(char *name, int wdSector) {
     return sector;
 }
 
+int FileSystem::PrintFullPath(int workSector)
+{
+    Directory *directory;
+    OpenFile *dirFile;
+    int sector;
+
+    dirFile = new OpenFile(workSector);
+    directory = new Directory(NumDirEntries);
+    directory->FetchFrom(dirFile);
+
+    char *path = directory->GetFullPath(workSector);
+    printf("Current path is: %s\n", path);
+    delete directory;
+    delete dirFile;
+    return 0;
+}
+
 // getter method for freeMapFile
 OpenFile *
 FileSystem:: GetFreeMapFile() {

@@ -54,6 +54,7 @@ Thread::Thread(char* threadName)
     PID = threadNum++; //start from 0
     //the curr directory point to /root
     wdSector = 1;
+    waitingFor=-1;
     cout<<"Thread with PID "<< PID <<" is generated!"<<endl;
 }
 
