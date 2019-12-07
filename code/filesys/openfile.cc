@@ -34,6 +34,7 @@ OpenFile::OpenFile(int sector)
     seekPosition = 0;
     hdrSector = sector;
     
+    
     if(kernel->OpenFileCount->find(hdrSector) == kernel->OpenFileCount->end())
     kernel->OpenFileCount->operator[](hdrSector)=0;
     else

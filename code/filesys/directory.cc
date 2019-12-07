@@ -151,7 +151,7 @@ Directory::Add(char *name, int newSector)
             return true;
         }
     }
-
+ASSERT(false);  // should not happen
     return FALSE;	// no space.  Fix when we have extensible files.
 }
 
@@ -167,6 +167,7 @@ Directory::AddDirectory(char *name, int newSector) {
             strncpy(table[i].name, name, FileNameMaxLen); 
             table[i].sector = newSector;
             table[i].isDir = true;
+            DEBUG('f',"directory hdr sector : "<< table[i].sector);
         return true;
     }
 
