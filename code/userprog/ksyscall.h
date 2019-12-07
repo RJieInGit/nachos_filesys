@@ -14,7 +14,7 @@
 #include "kernel.h"
 #include "thread.h"
 #include "list.h"
-
+#define MAX_STRING_LENGTH 128  //max length 
 char *
 LoadStringFromMemory(int vAddr) {
 
@@ -25,8 +25,8 @@ LoadStringFromMemory(int vAddr) {
     //memLock->Acquire();
     // printf("ld str acquire\n");
     for(int i = 0; i < MAX_STRING_LENGTH; ++i) {                   // iterate until max string length
-        int pAddr = currentThread->space->V2P(vAddr + i);
-        if((buffer[i] = machine->mainMemory[pAddr]) == '\0') {      // break if string ended
+        int pAddr = kernel->currentThread->space->V2P(vAddr + i);
+        if((buffer[i] = kernel->machine->mainMemory[pAddr]) == '\0') {      // break if string ended
           terminated = true;
           break;
         }
@@ -49,8 +49,8 @@ SaveStringToMemory(char* buffer, int numRead, int vAddr) {
     // printf("start read\n");
     //memLock->Acquire();
     for(int i = 0; i < numRead; ++i) {                   // iterate over the amount of bytes read
-        int pAddr = currentThread->space->V2P(vAddr + i);
-        machine->mainMemory[pAddr] = buffer[i];     // copy buffer from kernel-land back to user-land
+        int pAddr = kernel->currentThread->space->V2P(vAddr + i);
+        kernel->machine->mainMemory[pAddr] = buffer[i];     // copy buffer from kernel-land back to user-land
     }
     // printf("end read\n");
     //memLock->Release();
@@ -69,30 +69,30 @@ int SysAdd(int op1, int op2)
   return op1 + op2;
 }
 
-int SysCreate(char *name,int protection){
+int SysCreate(int name,int protection){
  char *filename = LoadStringFromMemory(name);     // grab filename argument from register
     if(filename == NULL)    // cant load filename string, so error
-        return ;
+        return 0;
 
     DEBUG('a', "filename: %s\n", filename);
-    fileSystem->Create(filename, 0, currentThread->space->wdSector);                    // attempt to create a new file
+    kernel->fileSystem->Create(filename, 0, kernel->currentThread->space->wdSector);                    // attempt to create a new file
 
     delete [] filename;
-    return ;
+    return 0;
 }
 
-int SysRemove(char *name){
-char *filename = LoadStringFromMemory(name); 
-kernel->fileSystem->Remove(name,kernel->currentThread->wdSector);
+int SysRemove(int addr){
+char *filename = LoadStringFromMemory(addr); 
+kernel->fileSystem->Remove(filename,kernel->currentThread->wdSector);
 }
 
 //mode is a int. &1 &2 &4 represent read, write ,executable
-OpenFileId SysOpen(char *name, int mode){
-  char *filename = LoadStringFromMemory(name);     // grab filename argument from register    
+OpenFileId SysOpen(int addr, int mode){
+  char *filename = LoadStringFromMemory(addr);     // grab filename argument from register    
     if(filename == NULL)   // cant load filename string, so error
         return -1;
     
-    OpenFile *f = fileSystem->Open(filename, currentThread->space->wdSector);
+    OpenFile *f = kernel->fileSystem->Open(filename, kernel->currentThread->space->wdSector);
   
     delete [] filename;
     if(f == NULL)        // cant open file, so error
@@ -102,54 +102,81 @@ OpenFileId SysOpen(char *name, int mode){
     return id;  
 }
 
-int SysWrite(char *buffer, int size, OpenFileId id){
+int SysWrite(int addr, int size, OpenFileId id){
   // printf("start write\n");
-    char *buffer = LoadStringFromMemory(machine->ReadRegister(4));     // grab buffer argument from register    
+    char *buffer = LoadStringFromMemory(addr);     // grab buffer argument from register    
     if(buffer == NULL)     // error bad input
-        return ;
-
-    int size = machine->ReadRegister(5);                              // grab number of bytes to write
-    OpenFileId id = machine->ReadRegister(6);                         // grab fileid of the file we want to write to
-
-
+        return 0;
     if(id == ConsoleOutput) {                                       // if we want to Write to ConsoleOutput, use the SynchConsole
         
-        ioLock->Acquire();
+        //ioLock->Acquire();
         char *curChar = buffer;                                     // iterate over the writebuffer and write out each character to ConsoleOutput
         while(size-- > 0)                         
-            synchConsole->WriteChar(*curChar++);
-        ioLock->Release();
+            kernel->synchConsoleOut->WriteChar(*curChar++);
+        //ioLock->Release();
     } 
     else {                                                           // else we are trying to write to an OpenFile
         
-        ioLock->Acquire();
+        //ioLock->Acquire();
         OpenFile *f = currentThread->space->fileVector->Resolve(id);   // resolve the fileid to an OpenFile Object using the OpenFileTable
         if(f == NULL) {     // trying to read from bad fileid
             delete [] buffer;
             ioLock->Release();
-            return ;
+            return 0;
         }
 
         f->Write(buffer, size);                                       // write the buffer to the OpenFile object                         
-        ioLock->Release();
     }
 
     // printf("end write\n");
     delete [] buffer;
-    return ;
+    return 0;
 }
 
-int SysRead(char *buffer, int size, OpenFileId id){
-
+int SysRead(int addr, int size, OpenFileId id){
+  char *buffer = getStringFromAddr(kernel->machine->ReadRegister(4));
+  if (id == ConsoleInputID)
+  {
+    int total = 0;
+    while (size > 0)
+    {
+      buffer[total] = kernel->synchConsoleIn->GetChar();
+      total++;
+      size--;
+    }
+    // write back for console
+    int addr = kernel->machine->ReadRegister(4);
+    int i = 0;
+    int value;
+    do
+    {
+      value = buffer[i];
+      if (!kernel->machine->WriteMem(addr + i, 1, value))
+      {
+        kernel->machine->WriteMem(addr + i, 1, value);
+      }
+      i++;
+    } while ((char)value != '\0');
+    return total;
+  }
+  OpenFile *file = kernel->currentThread->fileVector->Resolve(id);
+  if (file == NULL)
+    return -1;
+  int result = file->Read(buffer, size);
+  return result;
 }
 
 int SysSeek(int pos, OpenFileId id){
-
+  OpenFile *file = kernel->currentThread->fileVector->Resolve(id);
+  if (file == NULL)
+    return -1;
+  file->Seek(pos);
+  return 0;
 }
 
 int SysClose(OpenFileId id){                  // grab fileid to close
     currentThread->space->fileVector->Remove(id);                // decrement a reference count to that OpenFile object in the OpenFileTable
-    return ;
+    return 0;
 }
 
 int SC_JOIN(SpaceId id){
@@ -175,7 +202,7 @@ int SC_JOIN(SpaceId id){
     kernel->currentThread->Sleep(false);
     kernel->interrupt->SetLevel(oldlevel);
   }
-  return kernel->currentThread->childrenResult->at(id);
+  return kernel->currentThread->childList->at(id);
 }
 
 
@@ -185,9 +212,9 @@ int SysPwd()
   
   int workSector;
   if (kernel->currentThread->father != NULL)
-    workSector = kernel->currentThread->father->workSector;
+    workSector = kernel->currentThread->father->wdSector;
   else
-    workSector = kernel->currentThread->workSector;
+    workSector = kernel->currentThread->wdSector;
   kernel->fileSystem->PrintFullPath(workSector);
   return 0;
 }
@@ -197,9 +224,9 @@ void SysLsDir()
   // since exec thread joined from father thread, use father workSector
   int workSector;
   if (kernel->currentThread->father != NULL)
-    workSector = kernel->currentThread->father->workSector;
+    workSector = kernel->currentThread->father->wdSector;
   else
-    workSector = kernel->currentThread->workSector;
+    workSector = kernel->currentThread->wdSector;
   kernel->fileSystem->List(workSector);
 }
 

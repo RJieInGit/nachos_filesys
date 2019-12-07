@@ -139,7 +139,7 @@ ExceptionHandler(ExceptionType which)
 	      /* Process SysAdd Systemcall*/
 	      int result;
 	      result = SysRemove(/* int op1 */(int)kernel->machine->ReadRegister(4),
-			      /* int op2 */(int)kernel->machine->ReadRegister(5));
+			      /* int op2 */);
 	      DEBUG(dbgSys, "remove returning with " << result << "\n");
 	      /* Prepare Result */
 	      kernel->machine->WriteRegister(2, (int)result);
@@ -187,7 +187,7 @@ ExceptionHandler(ExceptionType which)
 	      /* Process SysAdd Systemcall*/
 	      int result;
 	      result = SysWrite(/* int op1 */(int)kernel->machine->ReadRegister(4),
-			      /* int op2 */(int)kernel->machine->ReadRegister(5));
+			      /* int op2 */(int)kernel->machine->ReadRegister(5),(int)kernel->machine->ReadRegister(6));
 	      DEBUG(dbgSys, "open returning with " << result << "\n");
 	      /* Prepare Result */
 	      kernel->machine->WriteRegister(2, (int)result);
