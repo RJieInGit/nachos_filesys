@@ -286,13 +286,15 @@ THREAD_O = alarm.o kernel.o main.o scheduler.o synch.o thread.o threadtest.o
 USERPROG_H = ../userprog/addrspace.h\
 	../userprog/syscall.h\
 	../userprog/synchconsole.h\
-	../userprog/noff.h
+	../userprog/noff.h\
+	../userprog/filetable.h
 
 USERPROG_C = ../userprog/addrspace.cc\
 	../userprog/exception.cc\
-	../userprog/synchconsole.cc
+	../userprog/synchconsole.cc\
+	../userprog/filetable.cc
 
-USERPROG_O = addrspace.o exception.o synchconsole.o
+USERPROG_O = addrspace.o exception.o synchconsole.o filetable.o
 
 FILESYS_H =../filesys/directory.h \
 	../filesys/filehdr.h\
@@ -301,7 +303,7 @@ FILESYS_H =../filesys/directory.h \
 	../filesys/pbitmap.h\
 	../filesys/synchdisk.h\
 	../filesys/fileblock.h\
-	../filesys/filetable.h
+
 
 FILESYS_C =../filesys/directory.cc\
 	../filesys/filehdr.cc\
@@ -310,9 +312,9 @@ FILESYS_C =../filesys/directory.cc\
 	../filesys/openfile.cc\
 	../filesys/synchdisk.cc\
 	../filesys/fileblock.cc\
-	../filesys/filetable.cc
 
-FILESYS_O =directory.o filehdr.o filesys.o pbitmap.o openfile.o synchdisk.o fileblock.o filetable.o
+
+FILESYS_O =directory.o filehdr.o filesys.o pbitmap.o openfile.o synchdisk.o fileblock.o 
 
 NETWORK_H = ../network/post.h
 
