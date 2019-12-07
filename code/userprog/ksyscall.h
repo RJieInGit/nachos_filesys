@@ -39,14 +39,6 @@ LoadStringFromMemory(int vAddr) {
     //memLock->Release();
     // printf("end load\n");
 
-    if(!terminated) {                         // if the string is longer than the max string length, return NULL
-        delete [] buffer;
-        return NULL;
-    }
-
-    buffer[MAX_STRING_LENGTH - 1] = '\0';                       // truncate string to protect against overflow
-    return buffer;
-}
 
 
 
