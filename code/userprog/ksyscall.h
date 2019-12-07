@@ -14,22 +14,26 @@
 #include "kernel.h"
 #include "thread.h"
 #include "list.h"
+#include "synchconsole.h"
+#include "debug.h"
 #define MAX_STRING_LENGTH 128  //max length 
 char *
 LoadStringFromMemory(int vAddr) {
 
     // printf("start load\n");
-    bool terminated = false;
-    char *buffer = new(std::nothrow) char[MAX_STRING_LENGTH];
-    
-    //memLock->Acquire();
-    // printf("ld str acquire\n");
-    for(int i = 0; i < MAX_STRING_LENGTH; ++i) {                   // iterate until max string length
-        int pAddr = kernel->currentThread->space->V2P(vAddr + i);
-        if((buffer[i] = kernel->machine->mainMemory[pAddr]) == '\0') {      // break if string ended
-          terminated = true;
-          break;
-        }
+   char *name = new char[100];
+	int value;
+	int i = 0;
+	do
+	{
+		if (!kernel->machine->ReadMem(addr + i, 1, &value))
+		{
+			kernel->machine->ReadMem(addr + i, 1, &value);
+		}
+		name[i] = (char)value;
+		i++;
+	} while ((char)value != '\0');
+	return name;
     }
 
     //memLock->Release();
@@ -44,19 +48,7 @@ LoadStringFromMemory(int vAddr) {
     return buffer;
 }
 
-void
-SaveStringToMemory(char* buffer, int numRead, int vAddr) {
-    // printf("start read\n");
-    //memLock->Acquire();
-    for(int i = 0; i < numRead; ++i) {                   // iterate over the amount of bytes read
-        int pAddr = kernel->currentThread->space->V2P(vAddr + i);
-        kernel->machine->mainMemory[pAddr] = buffer[i];     // copy buffer from kernel-land back to user-land
-    }
-    // printf("end read\n");
-    //memLock->Release();
 
-    return ;
-}
 
 void SysHalt()
 {
@@ -74,8 +66,8 @@ int SysCreate(int name,int protection){
     if(filename == NULL)    // cant load filename string, so error
         return 0;
 
-    DEBUG('a', "filename: %s\n", filename);
-    kernel->fileSystem->Create(filename, 0, kernel->currentThread->space->wdSector);                    // attempt to create a new file
+    DEBUG('a', "filename: " <<filename);
+    kernel->fileSystem->Create(filename, 0, kernel->currentThread->wdSector);                    // attempt to create a new file
 
     delete [] filename;
     return 0;
@@ -92,13 +84,13 @@ OpenFileId SysOpen(int addr, int mode){
     if(filename == NULL)   // cant load filename string, so error
         return -1;
     
-    OpenFile *f = kernel->fileSystem->Open(filename, kernel->currentThread->space->wdSector);
+    OpenFile *f = kernel->fileSystem->Open(filename, kernel->currentThread->wdSector);
   
     delete [] filename;
     if(f == NULL)        // cant open file, so error
         return -1;
 
-    OpenFileId id = currentThread->space->fileVector->Insert(f);
+    OpenFileId id = kernel->currentThread->space->fileVector->Insert(f);
     return id;  
 }
 
@@ -118,10 +110,10 @@ int SysWrite(int addr, int size, OpenFileId id){
     else {                                                           // else we are trying to write to an OpenFile
         
         //ioLock->Acquire();
-        OpenFile *f = currentThread->space->fileVector->Resolve(id);   // resolve the fileid to an OpenFile Object using the OpenFileTable
+        OpenFile *f = kernel->currentThread->space->fileVector->Resolve(id);   // resolve the fileid to an OpenFile Object using the OpenFileTable
         if(f == NULL) {     // trying to read from bad fileid
             delete [] buffer;
-            ioLock->Release();
+            //ioLock->Release();
             return 0;
         }
 
@@ -134,7 +126,7 @@ int SysWrite(int addr, int size, OpenFileId id){
 }
 
 int SysRead(int addr, int size, OpenFileId id){
-  char *buffer = getStringFromAddr(kernel->machine->ReadRegister(4));
+  char *buffer = LoadStringFromMemory(addr);
   if (id == ConsoleInputID)
   {
     int total = 0;
@@ -175,7 +167,7 @@ int SysSeek(int pos, OpenFileId id){
 }
 
 int SysClose(OpenFileId id){                  // grab fileid to close
-    kernel->currentThread->space->fileVector->Remove(id);                // decrement a reference count to that OpenFile object in the OpenFileTable
+    kernel->currentThread->fileVector->Remove(id);                // decrement a reference count to that OpenFile object in the OpenFileTable
     return 0;
 }
 

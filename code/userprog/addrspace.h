@@ -42,6 +42,7 @@ class AddrSpace {
 
     //page swap
     TranslationEntry* getPageEntry(int PageNum) { return &pageTable[PageNum]; }
+    fileVector
 
   private:
     TranslationEntry *pageTable;	// Assume linear page table translation
