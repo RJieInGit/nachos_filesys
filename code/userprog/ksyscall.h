@@ -18,7 +18,7 @@
 #include "debug.h"
 #define MAX_STRING_LENGTH 128  //max length 
 char *
-LoadStringFromMemory(int vAddr) {
+LoadStringFromMemory(int addr) {
 
     // printf("start load\n");
    char *name = new char[100];
@@ -82,7 +82,7 @@ OpenFileId SysOpen(int addr, int mode){
     if(f == NULL)        // cant open file, so error
         return -1;
 
-    OpenFileId id = kernel->currentThread->space->fileVector->Insert(f);
+    OpenFileId id = kernel->currentThread->fileVector->Insert(f);
     return id;  
 }
 
@@ -96,13 +96,13 @@ int SysWrite(int addr, int size, OpenFileId id){
         //ioLock->Acquire();
         char *curChar = buffer;                                     // iterate over the writebuffer and write out each character to ConsoleOutput
         while(size-- > 0)                         
-            kernel->synchConsoleOut->WriteChar(*curChar++);
+            kernel->synchConsoleOut->PutChar(*curChar++);
         //ioLock->Release();
     } 
     else {                                                           // else we are trying to write to an OpenFile
         
         //ioLock->Acquire();
-        OpenFile *f = kernel->currentThread->space->fileVector->Resolve(id);   // resolve the fileid to an OpenFile Object using the OpenFileTable
+        OpenFile *f = kernel->currentThread->fileVector->Resolve(id);   // resolve the fileid to an OpenFile Object using the OpenFileTable
         if(f == NULL) {     // trying to read from bad fileid
             delete [] buffer;
             //ioLock->Release();
