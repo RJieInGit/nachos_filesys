@@ -78,6 +78,21 @@ ExceptionHandler(ExceptionType which)
 		  // Exit_POS(id);
 		  //printf("Thread %s exited with status: %d\n",currentThread->getName().c_str(),status);
 		  cout<<"Thread with PID "<<kernel->currentThread->PID<<" is going to finish! with status: "<< status << endl;
+
+		  // ad logic to maintain a childresult map , for the usage of join
+		  IntStatus oldlevel = kernel->interrupt->SetLevel(IntOff);
+  			Thread *cur = kernel->currentThread;
+  			if (cur->father != NULL){
+    			cur->father->childrenResult->insert(std::pair<int, int>(cur->PID, status));
+    			cur->father->childList->Remove(cur);
+    			cur->father->finishedChild->Append(kernel->currentThread->PID);
+    		if (cur->father->waitingFor == cur->PID)
+    		{
+     			kernel->waitingChildrenList->Remove(cur->father);
+     			 kernel->scheduler->ReadyToRun(cur->father);
+   			 }
+  }
+  kernel->interrupt->SetLevel(oldlevel);
 		  kernel->currentThread->Finish();
 		  ASSERTNOTREACHED();
 	  }break;
@@ -138,7 +153,7 @@ ExceptionHandler(ExceptionType which)
 		  DEBUG(dbgSys, "remove " << kernel->machine->ReadRegister(4) << " + " << kernel->machine->ReadRegister(5) << "\n");
 	      /* Process SysAdd Systemcall*/
 	      int result;
-	      result = SysRemove(/* int op1 */(int)kernel->machine->ReadRegister(4),
+	      result = SysRemove(/* int op1 */(int)kernel->machine->ReadRegister(4)
 			      /* int op2 */);
 	      DEBUG(dbgSys, "remove returning with " << result << "\n");
 	      /* Prepare Result */

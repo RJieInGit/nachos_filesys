@@ -69,6 +69,7 @@ class FileSystem {
 #else // FILESYS
 #define FreeMapSector 		0
 #define DirectorySector 	1
+
 class FileSystem {
   public:
     FileSystem(bool format);		// Initialize the file system.
@@ -93,6 +94,7 @@ class FileSystem {
     int ChangeDir(char *name, int wdSector);
 
 	int PrintFullPath(int wdSector);
+
 OpenFile *GetFreeMapFile();   // getter method
 OpenFile *GetDirectoryFile(); // getter method
   private:

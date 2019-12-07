@@ -175,7 +175,7 @@ int SysSeek(int pos, OpenFileId id){
 }
 
 int SysClose(OpenFileId id){                  // grab fileid to close
-    currentThread->space->fileVector->Remove(id);                // decrement a reference count to that OpenFile object in the OpenFileTable
+    kernel->currentThread->space->fileVector->Remove(id);                // decrement a reference count to that OpenFile object in the OpenFileTable
     return 0;
 }
 
@@ -202,7 +202,7 @@ int SC_JOIN(SpaceId id){
     kernel->currentThread->Sleep(false);
     kernel->interrupt->SetLevel(oldlevel);
   }
-  return kernel->currentThread->childList->at(id);
+  return kernel->currentThread->childrenResult->at(id);
 }
 
 
