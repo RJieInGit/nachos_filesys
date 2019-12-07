@@ -129,6 +129,7 @@ Directory::Find(char *name)
 bool
 Directory::Add(char *name, int newSector)
 { 
+    DEBUG('f',"now start add file to directory \n");
     if (FindIndex(name) != -1)
 	return FALSE;
 
@@ -138,6 +139,7 @@ Directory::Add(char *name, int newSector)
             strncpy(table[i].name, name, FileNameMaxLen); 
             table[i].sector = newSector;
             table[i].isDir = false;
+            DEBUG('f',"file hdr sector : "<< table[i].sector);
         return TRUE;
 	}
 
