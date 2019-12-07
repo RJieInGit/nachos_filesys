@@ -46,7 +46,7 @@
 #include "addrspace.h"
 #include "list.h"
 #include "../userprog/filetable.h"
-#include "map.h"
+#include "map"
 
 // CPU register state to be saved on context switch.  
 // The x86 needs to save only a few registers, 
